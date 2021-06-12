@@ -1,5 +1,8 @@
 # CollabCollage
-CollabCollage uses the Discogs API to search and compare different musicians' discographies to discover and chart all the collaborations and connections between their careers!
+CollabCollage is a MERN app that interfaces with the Discogs API to search for collaborations between two different musical artists. You can use it to unearth unexpected intersections, trace creative partnerships, and visualize new aspects of your favorite artists' careers.
+
+## In Progress
+CollabCollage was initially built as a React app working with an external API. In the hopes of persisting certain data to limit API requests and avoid long load-times and rate-limiting snafus, it is currently being rebuilt as a MERN stack application.
 
 ## To Do
 CollabCollage is still in the process of being built, but there's plenty more to be done:
