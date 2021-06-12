@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 // Create Schema
-const ReleaseSchema = new Schema({
+const BackupSchema = new Schema({
   artist: {
     type: String,
     required: true
@@ -24,4 +24,4 @@ const ReleaseSchema = new Schema({
   }
 })
 
-module.exports = Release = mongoose.model('release', ReleaseSchema);
+module.exports = Backup = mongoose.model('backup', BackupSchema);
