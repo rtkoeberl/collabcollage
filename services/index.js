@@ -1,2 +1,2 @@
-module.exports.discogs = require('./discogs.services');
-module.exports.backup = require('./backup.services');
+module.exports.discogsService = require('./discogs.services');
+module.exports.backupService = require('./backup.services');

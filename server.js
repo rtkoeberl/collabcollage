@@ -18,8 +18,8 @@ mongoose.connect(uri, { useNewUrlParser: true, useCreateIndex: true, useUnifiedT
   .catch(err => console.log(err));
 
 // Routes
-const releaseRouter = require('./routes/api/releases');
-app.use('/api/releases', releaseRouter);
+const routes = require('./routes');
+app.use('/api', routes);
 
 app.listen(port, () => {
   console.log(`Server is listening on port: ${port}`);

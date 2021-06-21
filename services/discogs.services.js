@@ -1,5 +1,3 @@
-import { Server } from 'http';
-
 // Authorize Discogs via Disconnect
 const Disconnect = require('disconnect').Client;
 const db = new Disconnect('CollabCollage/0.1', {
@@ -106,4 +104,4 @@ const Discogs = {
   }
 }
 
-export default Discogs;
+// export default Discogs;
