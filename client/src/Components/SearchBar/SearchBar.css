@@ -1,0 +1,14 @@
+.SearchBar {
+  margin: 0 auto;
+  width: 50%;
+}
+
+#lengthWarning {
+  color: red;
+  font-weight: 700;
+  transition: visibility 750ms ease;
+}
+
+.hidden {
+  visibility: hidden;
+}

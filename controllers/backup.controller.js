@@ -7,8 +7,7 @@ const {
   removeBackup
 } = backupService;
 
-
-
+// 
 const getBackup = (req, res) => {
   readBackup()
     .then(releases => {
@@ -18,7 +17,7 @@ const getBackup = (req, res) => {
     .catch(err => res.status(400).json('Error: ' + err))
 };
 
-
+// 
 const getBackupById = (req, res) => {
   const { artistId }  = req.params;
   readBackup(artistId)
@@ -29,7 +28,7 @@ const getBackupById = (req, res) => {
     .catch(err => res.status(400).json('Error: ' + err))
 };
 
-
+// 
 const postBackup = (req, res) => {
   const { artist, artistId, releases, items } = req.body;
   createBackup(artist, artistId, releases, items)
@@ -40,6 +39,7 @@ const postBackup = (req, res) => {
     .catch(err => res.status(400).json('Error: ' + err))
 };
 
+// 
 const updateBackup = (req, res) => {
   const { artist, artistId, releases, items } = req.body;
   replaceBackup(artist, artistId, releases, items)
@@ -50,6 +50,7 @@ const updateBackup = (req, res) => {
     .catch(err => res.status(400).json('Error: ' + err))
 };
 
+// 
 const deleteBackup = (req, res) => {
   const { artistId }  = req.params;
   removeBackup(artistId)
@@ -57,7 +58,7 @@ const deleteBackup = (req, res) => {
       console.log(response.n ? `Backup for artist (ID #${artistId}) deleted` : 'No artist with that ID found');
       res.json(response); 
     })
-    .catch(err => res.status(400).json('Error: ' + err))
+    .catch(err => res.status(404).json('Error: ' + err))
 };
 
 module.exports = {

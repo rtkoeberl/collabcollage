@@ -4,6 +4,7 @@ const db = new Disconnect('CollabCollage/0.1', {
   consumerKey: process.env.REACT_APP_CONSUMER_KEY,
   consumerSecret: process.env.REACT_APP_CONSUMER_SECRET
 }).database();
+// console.log('Discogs connection established via Disconnect')
 
 // Set 1-Request-per-Second limit with Bottleneck
 const Bottleneck = require("bottleneck");
@@ -12,96 +13,63 @@ const limiter = new Bottleneck({
   minTime: 1000
 });
 
-// Booleans for...
-// > if length-in-pages has been checked on initial credits search
-let lengthCheck = false;
-// > if the results should be uploaded or updated on the mongoDb server
-let uploadResults = false;
-let updateResults = false;
+// Discogs service functions: search for artist, get artist info, get artist's credits, get release info
 
-const Discogs = {
-  search(artist) {
-    return limiter.schedule(() => db.search(artist, { type: 'artist' }))
-      // .then(data => {
-      //   return data.results.foreach(result => {
-      //     what do i do with this data
-      //     (I want result.id and result.title and maybe result.cover_image)
-      //    })
-      //  });
-  },
-
-  getArtist(id) {
-    // LATER: if artistID passed in is a band, find each member and run getCredits again with their ID's
-    return limiter.schedule(() => db.getArtist(id));
-  },
-
-  getCreditsFromDb(id) {
-    // if (session history contains id) { pull from there and return }
-    return limiter.schedule(() => db.getArtistReleases(id, {sort: 'year', page: 1, per_page: 100}))
-      .then(async results => {
-        
-        console.log(`Searching Discogs...\n${results.pagination.pages} pages of results`);
-        let releases = results.releases;
-
-        // Check length against mongoDb policy
-        if (results.pagination.pages >= 50) {
-        //   if (`server/api/discog/${id}`) {
-        //     if (results.pagination.items != apiCall.result.items && apiCall.date.toDateString() != Date.now.toDateString() ) {
-        //       updateResults = true;
-        //     } else {
-        //       return apiCall.results.releases
-        //     }
-        //   } else {
-        //     uploadResults = true;
-        //   }
-        // also hey what if updating the results brought you down an alternate path where you just uploaded the LAST item added?
-        }
-        
-        // Initiate recursive getCredits call if results have more than one page
-        if (results.pagination.page < results.pagination.pages) {
-          releases.concat(await Discogs.getCredits(id, 2))
-          if (uploadResults) {
-          //  upload the dang results to mongodb
-           uploadResults = false 
-          }
-          if (updateResults) {
-          //  update the dang results to mongodb
-           updateResults = false 
-          }
-        }
-
-        lengthCheck = false;
-        console.log('lengthCheck set to false');
-        return releases;
-        
-      })
-  },
-
-  getCredits(id, page = 1) {
-    console.log(`Returning page ${page}!`)
-    
-    return limiter.schedule(() => db.getArtistReleases(id, {sort: 'year', page: page, per_page: 100}))
-      .then(async results => {
-        let releases = results.releases;
-        if (results.pagination.page < results.pagination.pages) {
-          return releases.concat(await Discogs.getCredits(id, page+1))
-        } else {
-          lengthCheck = false;
-          console.log('lengthCheck set to false');
-          // if (updateResults) { update results }
-          // if (uploadResults) { upload results }
-          return releases;
-        }
-      });
-  },
-
-  getLastPage(id) {
-
-  },
-
-  getRelease(id) {
-    return limiter.schedule(() => db.getRelease(id))
+const searchArtists = async (artist) => {
+  try {
+    return await limiter.schedule(() => db.search(artist, { type: 'artist' }))
+  } catch(e) {
+    throw new Error(e.message);
   }
 }
 
-// export default Discogs;
+const readArtist = async (artistId) => {
+  try {
+    return await limiter.schedule(() => db.getArtist(artistId));
+  } catch(e) {
+    throw new Error(e.message);
+  }
+}
+
+// Return first page of artist's credits
+const readArtistCredits = async (artistId, page) => {
+  try {
+    return await limiter.schedule(() => db.getArtistReleases(artistId, {sort: 'year', page: page, per_page: 100}))
+  } catch(e) {
+    throw new Error(e.message);
+  }
+}
+
+// Return compiled record of artist's credits
+const compileArtistCredits = async (artistId, page) => {
+  try {
+    console.log(`Retrieving page ${page}...`)
+    const results = await limiter.schedule(() => db.getArtistReleases(artistId, {sort: 'year', page: page, per_page: 100}))
+    let releases = results.releases;
+    if (results.pagination.page < results.pagination.pages) {
+      return releases.concat(await compileArtistCredits(artistId, page+1))
+    } else {
+      console.log(`Returning releases!`);
+      return releases;
+    }
+  } catch(e) {
+    throw new Error(e.message);
+  }
+}
+
+// Retrieve details of singular release
+const readRelease = async (releaseId) => {
+  try {
+    return await limiter.schedule(() => db.getRelease(releaseId));
+  } catch(e) {
+    throw new Error(e.message);
+  }
+}
+
+module.exports = {
+  searchArtists,
+  readArtist,
+  readArtistCredits,
+  compileArtistCredits,
+  readRelease
+}
