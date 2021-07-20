@@ -3,12 +3,23 @@
   width: 50%;
 }
 
+h1 {
+  margin: 15px auto;
+}
+
 #lengthWarning {
   color: red;
   font-weight: 700;
   transition: visibility 750ms ease;
+  margin: 10px auto;
 }
 
 .hidden {
   visibility: hidden;
+}
+
+button {
+  margin-top: 5px;
+  padding: 7px 15px;
+  font-size: 1rem;
 }

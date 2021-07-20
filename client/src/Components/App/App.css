@@ -1,3 +1,8 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
 .App {
   text-align: center;
 }
@@ -37,16 +42,3 @@
   }
 }
 
-.sidebyside {
-  display: flex;
-}
-
-.sidebyside pre {
-  width: 50%;
-  white-space: pre-wrap;
-}
-
-ul li {
-  list-style-type: none;
-  padding-left: 0;
-}

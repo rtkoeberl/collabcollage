@@ -1,76 +1,132 @@
 import React from 'react';
 import axios from 'axios';
 import './App.css';
+import { formatRelease } from '../../Util'
 import { SearchBar } from '../SearchBar/SearchBar'
+import { AlbumGrid } from '../AlbumGrid/AlbumGrid'
 
 class App extends React.Component {
   constructor(props) {
     super(props);
   
     this.saveArtist = this.saveArtist.bind(this);
+    this.getArtistInfo = this.getArtistInfo.bind(this);
     this.getCredits = this.getCredits.bind(this);
+    this.toggleCompare = this.toggleCompare.bind(this);
     
     this.state = {
       artists: [],
-      years: [],
-      credits: []
+      runCompare: false
     }
   }
-
-  async saveArtist(valArr)  {
-    // Theoretically place logic for loading stuff here
-    let artistArr = await Promise.all(valArr.map(async (val) => {
-      let called = this.state.artists.map(a => a.id).indexOf(val.value);
-      if (called > -1) {
-        return this.state.artists[called];
-      } else {
-        let call1 = axios.get(`/api/discog/${val.value}`);
-        let call2 = axios.get(`/api/discog/${val.value}/releases`);
-        let [artist, discog] = await Promise.all([call1, call2]);
-        console.log(discog)
-
-        // import regex logic for profile
-        return {
-          name: artist.data.name,
-          id: artist.data.id,
-          profile: artist.data.profile,
-          page: discog.data.pagination.page,
-          pages: discog.data.pagination.pages,
-          releases: discog.data.releases
-        }
+  
+  // Update artists state with name/id from SearchBar, and call API to fill in additional info if needed
+  saveArtist(valArr)  {
+    this.setState(prevState => {
+      return {
+        artists: valArr.map(({label, value}) => {
+          let called = prevState.artists.map(a => a.id).indexOf(value);
+          if (called > -1) {
+            return prevState.artists[called];
+          } else {
+            this.getArtistInfo(value)
+            return {
+              name: label,
+              id: value
+            }
+          }
+        })
       }
-    }));
-    
-    console.log(artistArr);
-    this.setState({
-      artists: artistArr
     });
   }
 
-  getCredits() {
-    axios.get(`/api/discog/${this.state.artists[0].id}/releases`)
-      .then(res => {
-        console.log(res.data);
-        this.setState({
-          credits: res.data.releases
-        });
-      })
+  // Call for artist info and first page of discography
+  async getArtistInfo(id)  {
+    let artistCall = axios.get(`/api/discog/${id}`);
+    let discogCall = axios.get(`/api/discog/${id}/releases`);
+    let [{data: artist}, {data: discog}] = await axios.all([artistCall, discogCall]);
+
+    let artistInfo = {
+      name: artist.name,
+      id: artist.id,
+      profile: artist.profile,
+      page: discog.pagination.page,
+      pages: discog.pagination.pages,
+      items: discog.pagination.items,
+      releases: formatRelease(discog.releases, 1)
+    }
+
+    console.log(artistInfo);
+
+    // check mongo backup for this artist's discog
+    if (discog.pagination.pages >= 50) {
+      let {data: backup} = await axios.get(`/api/backup/${id}`)
+      if (typeof backup[0] === 'object') {
+        if (
+          backup[0].items !== discog.pagination.items &&
+          new Date(backup[0].date).toLocaleDateString !== Date.now().toLocaleDateString
+        ) {
+          console.log(`Backup for ${artist.name} to update`)
+          artistInfo.backupStatus = 'update';
+        } else {
+          console.log(`Backup for ${artist.name} retrieved`)
+          artistInfo.page = discog.pagination.pages;
+          artistInfo.releases = backup[0].releases;
+        }
+      } else {
+        console.log(`Backup for ${artist.name} to upload`)
+        artistInfo.backupStatus = 'upload';
+      }
+    }
+
+    // LATER: add regex logic to trim profile blurb
+
+    let artists = [...this.state.artists];
+    let index = artists.map(a => a.id).indexOf(id);
+    if (index > -1) {
+      artists[index] = artistInfo;
+      console.log(`Set state info for ${artistInfo.name}`);
+      this.setState({
+        artists: artists
+      });
+    } else {
+      console.log(`Couldn't catch up with ${artistInfo.name}`)
+    }
+  }
+  
+  // Call for another page of an artist's credits
+  async getCredits(id, page, i) {
+    let { data: newPage } = await axios.get(`/api/discog/${id}/releases/${page}`)
+    let newReleases = formatRelease(newPage.releases, page);
+    
+    let artists = [...this.state.artists];
+    artists[i].releases = artists[i].releases.concat(newReleases);
+    console.log(artists[i].releases)
+    this.setState({
+      artists: artists
+    });
+  }
+
+  // Handle starting/stopping comparison requests
+  toggleCompare(boolean) {
+    if (boolean === true) {
+      if (this.state.runCompare === false) {
+        this.setState({runCompare: true});
+        console.log("We're running")
+      } else {
+        console.log('Comparison already in progress')
+      }
+    } else if ( boolean === false ){
+      this.setState({ runCompare: false })
+    }
   }
 
   render() {
     return (
       <div className="App">
         <h1>CollabCollage</h1>
-        <SearchBar onChange={this.saveArtist} />
-        <div className="sidebyside">
-          <pre>Selected Value: {JSON.stringify(this.state.artists[0] || {}, null, 2)}</pre>
-          <pre>Selected Value: {JSON.stringify(this.state.artists[1] || {}, null, 2)}</pre>
-        </div>
-        <button onClick={this.getCredits}>Get first artist's credits!</button>
-        <pre>Selected Value: <ul>
-        {this.state.credits.map((release, i) => <li key={i}>{release.title}</li>)}
-
-          </ul></pre>
+        <SearchBar onChange={this.saveArtist} onRun={this.toggleCompare} running={this.state.runCompare} />
+        <AlbumGrid state={this.state} onGetCredits={this.getCredits} onReset={this.toggleCompare} />
       </div>
     );
   }

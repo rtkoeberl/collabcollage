@@ -1,0 +1,15 @@
+.sidebyside {
+  display: flex;
+}
+
+.sidebyside .artistBlock {
+  width: 50%;
+  padding: 5%;
+  white-space: pre-wrap;
+  text-align: left;
+}
+
+ul li {
+  list-style-type: none;
+  padding-left: 0;
+}

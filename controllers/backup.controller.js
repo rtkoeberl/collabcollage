@@ -22,8 +22,8 @@ const getBackupById = (req, res) => {
   const { artistId }  = req.params;
   readBackup(artistId)
     .then(releases => {
-      console.log(`Backup for ${releases[0].artist} retrieved`);
-      res.json(release); 
+      console.log(releases.length ? `Backup for ${releases[0].artist} retrieved` : `No existing backup`);
+      res.json(releases); 
     })
     .catch(err => res.status(400).json('Error: ' + err))
 };

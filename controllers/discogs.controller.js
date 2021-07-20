@@ -26,14 +26,15 @@ const search = (req, res) => {
 };
 
 // Return artist info from Discogs
-const getArtist = (req, res) => {
-  const { artistId }  = req.params;
-  readArtist(artistId)
-    .then(artistInfo => {
-      console.log(`Artist info for ${artistInfo.name} retrieved`);
-      res.json(artistInfo); 
-    })
-    .catch(err => res.status(400).json('Error: ' + err))
+const getArtist = async (req, res) => {
+  try {
+    const { artistId }  = req.params;
+    const artistInfo = await readArtist(artistId)
+    console.log(`Artist info for ${artistInfo.name} retrieved`);
+    res.json(artistInfo); 
+  } catch {
+    err => res.status(400).json('Error: ' + err)
+  }
 };
 
 // Check local and db storage for discography and otherwise return first page of results from Discogs
@@ -41,19 +42,8 @@ const getArtistReleases = async (req, res) => {
   try {
     const { artistId }  = req.params;
     // if (session history contains id) { pull from there and return }
-    const results = await readArtistCredits(artistId)
-
-    // check mongo backup for this artist's discog
-    if (results.pagination.pages >= 50) {
-      backup = await backupService.checkBackup(artistId, 1)
-      if (typeof backup === 'object') {
-        console.log('Returning backup')
-        return res.json(backup);
-      } else {
-        results.backupStatus = backup;
-      }
-    }
-
+    const results = await readArtistCredits(artistId)  
+    console.log(`First page of artist #${artistId}'s credits retrieved`)
     res.json(results);
   } catch {
     err => res.status(400).json('Error: ' + err)
@@ -71,7 +61,7 @@ const getArtistReleasePage = async (req, res) => {
 }
 
 // Recursive call to retrieve entire discography through a single request -- do not use
-const compileReleases = async (id, page = 1) => {
+/* const compileReleases = async (id, page = 1) => {
   try {
     const { artistId }  = req.params;
     const { artist } = req.body;
@@ -107,7 +97,7 @@ const compileReleases = async (id, page = 1) => {
   } catch {
     err => res.status(400).json('Error: ' + err)
   }
-}
+} */
 
 module.exports = {
   search,
