@@ -6,12 +6,12 @@ import './SearchBar.css';
 
 // TO DO
 // https://sanusart.github.io/react-dropdown-select/prop/no-data-renderer
+// Change color of every artist past 2... although might not be a prob if i can compare more than two!
 
-export function SearchBar({ onChange, onRun, running }) {
+export function SearchBar({ onChange, runCompare }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [artistLimit, setArtistLimit] = useState(false);
-  const [canSearch, setCanSearch] = useState(false);
 
   // Search for artist
   const handleSearch = (value) => {
@@ -48,20 +48,15 @@ export function SearchBar({ onChange, onRun, running }) {
   // Update artist information
 
   const handleChange = (valArr) => {
-    if (!running) {
+    if (!runCompare) {
       onChange(valArr.slice(0,2));
-      setCanSearch(valArr.length > 1 ? true : false);
       setArtistLimit(valArr.length > 2 ? true : false);
     } else {
       // send an alert!
     } 
   }
 
-  const handleRun = (value) => {
-    onRun(value);
-  }
-
-  return(
+  return (
     <div className="SearchBar">
       <p id="lengthWarning" className={artistLimit ? '' : 'hidden'}>Too many artists, please delete one!</p>
       <Select
@@ -70,7 +65,6 @@ export function SearchBar({ onChange, onRun, running }) {
         searchFn={handleSearch}
         onChange={value => handleChange(value)}
       />
-      <button onClick={() => handleRun(true)} disabled={!canSearch}>Generate Discog</button>
     </div>
   )
 }

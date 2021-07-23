@@ -7,7 +7,7 @@ export default function formatRelease(releaseArr, page) {
     thumb: r.thumb,
     title: r.title,
     year: r.year,
-    id_m: r.type === "master" ? `m${r.id}` : null,
-    id_r: r.type === "master" ? `r${r.main_release}` : r.id
+    id_m: r.type === "master" ? r.id : 0,
+    id_r: r.type === "master" ? r.main_release : r.id
   }));
 }

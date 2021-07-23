@@ -4,6 +4,7 @@ import './App.css';
 import { formatRelease } from '../../Util'
 import { SearchBar } from '../SearchBar/SearchBar'
 import { AlbumGrid } from '../AlbumGrid/AlbumGrid'
+import { RunButton } from '../RunButton/RunButton'
 
 class App extends React.Component {
   constructor(props) {
@@ -32,7 +33,9 @@ class App extends React.Component {
             this.getArtistInfo(value)
             return {
               name: label,
-              id: value
+              id: value,
+              page: 0,
+              releases: []
             }
           }
         })
@@ -101,10 +104,12 @@ class App extends React.Component {
     
     let artists = [...this.state.artists];
     artists[i].releases = artists[i].releases.concat(newReleases);
-    console.log(artists[i].releases)
+    artists[i].page = newPage.pagination.page;
+
     this.setState({
       artists: artists
     });
+    
   }
 
   // Handle starting/stopping comparison requests
@@ -112,6 +117,7 @@ class App extends React.Component {
     if (boolean === true) {
       if (this.state.runCompare === false) {
         this.setState({runCompare: true});
+        // Minimize SearchBox
         console.log("We're running")
       } else {
         console.log('Comparison already in progress')
@@ -125,7 +131,11 @@ class App extends React.Component {
     return (
       <div className="App">
         <h1>CollabCollage</h1>
-        <SearchBar onChange={this.saveArtist} onRun={this.toggleCompare} running={this.state.runCompare} />
+        <div id="searchBox">
+          <SearchBar onChange={this.saveArtist} runCompare={this.state.runCompare} />
+          <RunButton artists={this.state.artists} onRun={this.toggleCompare} />
+          {/* Options... */}
+        </div>
         <AlbumGrid state={this.state} onGetCredits={this.getCredits} onReset={this.toggleCompare} />
       </div>
     );
