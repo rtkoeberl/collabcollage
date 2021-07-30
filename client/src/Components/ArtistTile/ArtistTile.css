@@ -1,0 +1,11 @@
+.artistBlock {
+  display: inline-block;
+  width: 50%;
+  padding: 5%;
+  white-space: pre-wrap;
+  text-align: left;
+}
+
+.complete {
+  background-color: whitesmoke;
+}

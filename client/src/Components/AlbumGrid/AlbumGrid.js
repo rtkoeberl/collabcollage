@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { updateLoadProgress, deepCopy } from '../../Util';
 import './AlbumGrid.css';
+import { AlbumTile } from '../AlbumTile/AlbumTile';
 
 export function AlbumGrid({ state: { artists, runCompare }, onGetCredits, onReset }) {
   const [loadPercent, setLoadPercent] = useState([]);
+  const [currentArtists, setCurrentArtists] = useState([]);
   const [collabs, setCollabs] = useState([]);
   // const [loadMsg, setLoadMsg] = useState('');
 
@@ -36,12 +38,10 @@ export function AlbumGrid({ state: { artists, runCompare }, onGetCredits, onRese
           musician.releases = output;
         })
     
-        console.log(musicians)
-    
         // find matching entries
-        for (let i = 0; i < musicians.length; i++) {
+        for (let i = 0; i < musicians.length - 1; i++) {
           console.log(`Comparing ${musicians[i].name}...`)
-          for (let j = 1; j < musicians.length; j++) {
+          for (let j = i+1; j < musicians.length; j++) {
             if (j > i) {
               console.log(`...with ${musicians[j].name}`)
               musicians[i].releases.forEach(r1 => {
@@ -100,12 +100,13 @@ export function AlbumGrid({ state: { artists, runCompare }, onGetCredits, onRese
             }
           }
         }
-        
+
         console.log(collabArr)
         setCollabs(collabArr);
       }
 
       if ( runCompare ) {
+        setCurrentArtists(artists.map(a => a.name))
         const load = updateLoadProgress(artists);
         setLoadPercent(load.totalLoaded);
         findCollabs();
@@ -114,12 +115,8 @@ export function AlbumGrid({ state: { artists, runCompare }, onGetCredits, onRese
           let { id: artistId, page } = artists[load.nextIndex];
           onGetCredits( artistId, page + 1, load.nextIndex );
         } else {
-          if (load.totalLoaded.every(l => l === 1)) {
-            onReset(false);
-            console.log("Resetting");
-          } else {
-            console.log('What happened?')
-          }
+          onReset(false);
+          console.log("Resetting");
           // place logic for uploading backups to mongo here!
         }
       }
@@ -132,19 +129,20 @@ export function AlbumGrid({ state: { artists, runCompare }, onGetCredits, onRese
     ]
   )
 
+  const loadAlbumInfo = (album) => {
+
+  }
+
   return (
     <div>
-      <div className="sidebyside">
-          {artists.map(a => (
-            <div className={a.page === a.pages && a.page !== 0 ? "artistBlock complete" : "artistBlock"} key={a.id}>
-              <p><strong>{a.name} (Artist #{a.id})</strong></p>
-              <p>Page {a.page} / {a.pages}</p>
-              <p>Releases: {a.releases ? a.releases.length : 0} / {a.items}</p>
-            </div>
-          ))}
-        </div>
-        {loadPercent.length && loadPercent[0] !== loadPercent[1] ? <div>Load Percent: {loadPercent[0]} / {loadPercent[1]}</div> : null}
-        <div>Results: {collabs.length ? collabs.length : 0}</div>
+      <div id="collageHeader"><h3>{currentArtists.length ? `Collaborations between ${currentArtists.slice(0, currentArtists.length-1).join(', ')}${currentArtists.length > 2 ? ',' : ''} and ${currentArtists[currentArtists.length-1]}` : null}</h3></div>
+      {loadPercent.length && loadPercent[0] !== loadPercent[1] ? <div>Load Percent: {loadPercent[0]} / {loadPercent[1]}</div> : null}
+      <div>Results: {collabs.length}</div>
+      <div className="tile-grid">
+        {collabs.map((album, id) => {
+          return <AlbumTile key={id} album={album} onGetInfo={loadAlbumInfo} />
+        })}
+      </div>
     </div>
   )
 }

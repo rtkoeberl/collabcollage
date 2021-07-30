@@ -1,0 +1,6 @@
+#artistTiles {
+  display: flex;
+  width: 80%;
+  margin: 0 auto;
+  padding: 5%;
+}

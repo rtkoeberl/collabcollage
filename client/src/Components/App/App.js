@@ -2,9 +2,8 @@ import React from 'react';
 import axios from 'axios';
 import './App.css';
 import { formatRelease } from '../../Util'
-import { SearchBar } from '../SearchBar/SearchBar'
+import { SearchContainer } from '../SearchContainer/SearchContainer';
 import { AlbumGrid } from '../AlbumGrid/AlbumGrid'
-import { RunButton } from '../RunButton/RunButton'
 
 class App extends React.Component {
   constructor(props) {
@@ -123,7 +122,8 @@ class App extends React.Component {
         console.log('Comparison already in progress')
       }
     } else if ( boolean === false ){
-      this.setState({ runCompare: false })
+      this.setState({ runCompare: false });
+      console.log("We stopped running!")
     }
   }
 
@@ -131,11 +131,7 @@ class App extends React.Component {
     return (
       <div className="App">
         <h1>CollabCollage</h1>
-        <div id="searchBox">
-          <SearchBar onChange={this.saveArtist} runCompare={this.state.runCompare} />
-          <RunButton artists={this.state.artists} onRun={this.toggleCompare} />
-          {/* Options... */}
-        </div>
+        <SearchContainer state={this.state} onChange={this.saveArtist} onRun={this.toggleCompare} />
         <AlbumGrid state={this.state} onGetCredits={this.getCredits} onReset={this.toggleCompare} />
       </div>
     );

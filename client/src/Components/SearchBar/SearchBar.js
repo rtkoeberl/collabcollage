@@ -49,8 +49,8 @@ export function SearchBar({ onChange, runCompare }) {
 
   const handleChange = (valArr) => {
     if (!runCompare) {
-      onChange(valArr.slice(0,2));
-      setArtistLimit(valArr.length > 2 ? true : false);
+      onChange(valArr.slice(0,5));
+      setArtistLimit(valArr.length > 5 ? true : false);
     } else {
       // send an alert!
     } 
