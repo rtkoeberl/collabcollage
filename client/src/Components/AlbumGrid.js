@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { updateLoadProgress, deepCopy } from '../../Util';
-import './AlbumGrid.css';
-import { AlbumTile } from '../AlbumTile/AlbumTile';
+import { updateLoadProgress, deepCopy } from '../Util';
+import { AlbumTile } from './AlbumTile';
 
 export function AlbumGrid({ state: { artists, runCompare }, onGetCredits, onReset }) {
   const [loadPercent, setLoadPercent] = useState([]);
@@ -29,7 +28,7 @@ export function AlbumGrid({ state: { artists, runCompare }, onGetCredits, onRese
               let existingIndex = output.indexOf(existing[0]);
               output[existingIndex].role = output[existingIndex].role.concat(item.role);
             } else {
-              if (typeof item.role == 'string') {
+              if (typeof item.role === 'string') {
                 item.role = [item.role];
               }
               output.push(item)
@@ -74,6 +73,7 @@ export function AlbumGrid({ state: { artists, runCompare }, onGetCredits, onRese
                         thumb: r1.thumb,
                         title: r1.title,
                         year: r1.year,
+                        format: r1.format,
                         collaborators: [
                           {
                             _id: i,
@@ -134,11 +134,11 @@ export function AlbumGrid({ state: { artists, runCompare }, onGetCredits, onRese
   }
 
   return (
-    <div>
+    <div id="albumArea">
       <div id="collageHeader"><h3>{currentArtists.length ? `Collaborations between ${currentArtists.slice(0, currentArtists.length-1).join(', ')}${currentArtists.length > 2 ? ',' : ''} and ${currentArtists[currentArtists.length-1]}` : null}</h3></div>
       {loadPercent.length && loadPercent[0] !== loadPercent[1] ? <div>Load Percent: {loadPercent[0]} / {loadPercent[1]}</div> : null}
       <div>Results: {collabs.length}</div>
-      <div className="tile-grid">
+      <div id="albumGrid">
         {collabs.map((album, id) => {
           return <AlbumTile key={id} album={album} onGetInfo={loadAlbumInfo} />
         })}

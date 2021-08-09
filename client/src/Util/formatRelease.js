@@ -8,6 +8,7 @@ export default function formatRelease(releaseArr, page) {
     title: r.title,
     year: r.year,
     id_m: r.type === "master" ? r.id : 0,
-    id_r: r.type === "master" ? r.main_release : r.id
+    id_r: r.type === "master" ? r.main_release : r.id,
+    format: r.format ? r.format : null
   }));
 }

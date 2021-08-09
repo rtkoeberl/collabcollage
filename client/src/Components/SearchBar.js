@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Select from 'react-dropdown-select';
-import { useDebounce } from '../../Util'
-import './SearchBar.css';
+import { useDebounce } from '../Util'
 
 // TO DO
 // https://sanusart.github.io/react-dropdown-select/prop/no-data-renderer
@@ -57,7 +56,7 @@ export function SearchBar({ onChange, runCompare }) {
   }
 
   return (
-    <div className="SearchBar">
+    <div id="searchBar">
       <p id="lengthWarning" className={artistLimit ? '' : 'hidden'}>Too many artists, please delete one!</p>
       <Select
         multi

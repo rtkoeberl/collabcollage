@@ -13,5 +13,5 @@ export function RunButton ({ artists, onRun }) {
     }, [artists]
   )
 
-  return (<button onClick={() => onRun(true)} disabled={!canSearch}>Generate Discog</button>)
+  return (<button id="runButton" onClick={() => onRun(true)} disabled={!canSearch}>Generate Discog</button>)
 }

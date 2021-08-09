@@ -1,9 +1,9 @@
 import React from 'react';
 import axios from 'axios';
-import './App.css';
-import { formatRelease } from '../../Util'
-import { SearchContainer } from '../SearchContainer/SearchContainer';
-import { AlbumGrid } from '../AlbumGrid/AlbumGrid'
+import '../Sass/app.scss'
+import { formatRelease } from '../Util'
+import { SearchContainer } from './SearchContainer';
+import { AlbumGrid } from './AlbumGrid'
 
 class App extends React.Component {
   constructor(props) {

@@ -1,0 +1,29 @@
+.albumTile {
+  position: relative;
+  display: inline-block;
+  width: 150px;
+
+  .albumCover {
+    z-index: 1;
+    width: 150px;
+  }
+
+  .albumInfo {
+    visibility: hidden;
+    padding: 1em;
+    border: 1px solid #404040;
+    position: absolute;
+    left: -10px;
+    z-index: 5;
+  }
+
+  &:hover {
+    cursor: pointer;
+
+    .albumInfo {
+      visibility: visible;
+    }
+  }
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */

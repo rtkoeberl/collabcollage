@@ -1,10 +1,10 @@
-.SearchBar {
-  margin: 0 auto;
-  width: 50%;
+#searchContainer {
+  text-align: center;
 }
 
-h1 {
-  margin: 15px auto;
+#searchBar {
+  margin: 0 auto;
+  width: 50%;
 }
 
 #lengthWarning {
@@ -12,13 +12,13 @@ h1 {
   font-weight: 700;
   transition: visibility 750ms ease;
   margin: 10px auto;
+  
+  &.hidden {
+    visibility: hidden;
+  }
 }
 
-.hidden {
-  visibility: hidden;
-}
-
-button {
+#runButton {
   margin-top: 5px;
   padding: 7px 15px;
   font-size: 1rem;

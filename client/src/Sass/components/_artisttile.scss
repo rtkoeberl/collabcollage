@@ -1,0 +1,17 @@
+#artistTiles {
+  display: flex;
+  width: 80%;
+  margin: 0 auto;
+  padding: 5%;
+}
+
+.artistTile {
+  width: 50%;
+  padding: 5%;
+  white-space: pre-wrap;
+  text-align: left;
+
+  &.complete {
+    background-color: whitesmoke;
+  }
+}
