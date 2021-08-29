@@ -3,11 +3,11 @@ const Schema = mongoose.Schema;
 
 // Create Schema
 const BackupSchema = new Schema({
-  artist: {
+  name: {
     type: String,
     required: true
   },
-  artistId: {
+  id: {
     type: Number,
     required: true,
     unique: true

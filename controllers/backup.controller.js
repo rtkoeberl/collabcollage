@@ -19,10 +19,10 @@ const getBackup = (req, res) => {
 
 // 
 const getBackupById = (req, res) => {
-  const { artistId }  = req.params;
-  readBackup(artistId)
+  const { id }  = req.params;
+  readBackup(id)
     .then(releases => {
-      console.log(releases.length ? `Backup for ${releases[0].artist} retrieved` : `No existing backup`);
+      console.log(releases.length ? `Backup for ${releases[0].name} retrieved` : `No existing backup`);
       res.json(releases); 
     })
     .catch(err => res.status(400).json('Error: ' + err))
@@ -30,10 +30,10 @@ const getBackupById = (req, res) => {
 
 // 
 const postBackup = (req, res) => {
-  const { artist, artistId, releases, items } = req.body;
-  createBackup(artist, artistId, releases, items)
+  const { name, id, releases, items } = req.body;
+  createBackup(name, id, releases, items)
     .then(releases => {
-      console.log(`Backup for ${artist} created`);
+      console.log(`Backup for ${name} created`);
       res.json(releases);
     })
     .catch(err => res.status(400).json('Error: ' + err))
@@ -41,10 +41,10 @@ const postBackup = (req, res) => {
 
 // 
 const updateBackup = (req, res) => {
-  const { artist, artistId, releases, items } = req.body;
-  replaceBackup(artist, artistId, releases, items)
+  const { name, id, releases, items } = req.body;
+  replaceBackup(name, id, releases, items)
     .then(releases => {
-      console.log(`Backup for ${artist} updated`);
+      console.log(`Backup for ${name} updated`);
       res.json(releases);
     })
     .catch(err => res.status(400).json('Error: ' + err))
@@ -52,10 +52,10 @@ const updateBackup = (req, res) => {
 
 // 
 const deleteBackup = (req, res) => {
-  const { artistId }  = req.params;
-  removeBackup(artistId)
+  const { id }  = req.params;
+  removeBackup(id)
     .then(response => {
-      console.log(response.n ? `Backup for artist (ID #${artistId}) deleted` : 'No artist with that ID found');
+      console.log(response.n ? `Backup for artist (ID #${id}) deleted` : 'No artist with that ID found');
       res.json(response); 
     })
     .catch(err => res.status(404).json('Error: ' + err))

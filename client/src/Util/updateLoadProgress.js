@@ -4,7 +4,7 @@ export default function updateLoadProgress(artists) {
   let nextIndex;
   let pageStats = artists.map(a => [a.page, a.pages]);
   let percentLoaded = pageStats.map(a => ((Math.round(a[0] / a[1] * 100) / 100)));
-  console.log(percentLoaded)
+  // console.log(percentLoaded)
 
   // calculate total progress for search
   let totalLoaded = pageStats.reduce((a, b) => ([a[0] + b[0], a[1] + b[1]]), [0, 0]);

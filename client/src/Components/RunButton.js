@@ -1,17 +1,46 @@
 import React, { useState, useEffect } from 'react';
 
-export function RunButton ({ artists, onRun }) {
+export function RunButton ({ artists, runCompare, onRun, toggleSidebar }) {
   const [canSearch, setCanSearch] = useState(false);
+  const [buttonMessage, setButtonMessage] = useState('Add Artists to Begin')
 
   useEffect(
     () => {
-      if (artists.length > 1 && artists.every(a => a.releases.length)) {
-        setCanSearch(true)
+      if (!runCompare) {
+        if (artists.length > 5) {
+          setCanSearch(false);
+          setButtonMessage('Too many artists, please delete one!');
+        } else if (artists.length > 1 && artists.length <= 5) {
+          if (artists.every(a => a.releases.length)) {
+            setCanSearch(true);
+            setButtonMessage('Generate Discog')
+          } else {
+            setCanSearch(false);
+            setButtonMessage('Loading Artist Data...')
+          }
+        } else {
+          setCanSearch(false);
+          setButtonMessage('Add Artists to Begin');
+        }
       } else {
-        setCanSearch(false)
+        setButtonMessage('Stop Search')
       }
-    }, [artists]
+    }, [artists, runCompare]
   )
 
-  return (<button id="runButton" onClick={() => onRun(true)} disabled={!canSearch}>Generate Discog</button>)
+  const handleRun = () => {
+    if (!runCompare) {
+      onRun(true);
+      if (window.innerWidth <= 500) {
+        toggleSidebar(true);
+      }
+    } else {
+      onRun(false);
+    }
+  }
+
+  return (
+    <div id="runButton">
+      <button className="btn" onClick={() => handleRun()} disabled={!canSearch}>{buttonMessage}</button>
+    </div>)
 }

@@ -1,10 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+// reset
 html {
   body {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    font-family: 'Cabin', Arial, sans-serif;
   }
 }
 
-h1 {
+// header
+header {
+  height: $headerHeight;
+  background-color: $blue;
+  color: white;
+  position: fixed;
   text-align: center;
+  top: 0;
+  width: 100vw;
+  z-index: 10;
+
+  h1 {
+    font-size: 1.5em;
+    line-height: $headerHeight;
+    text-align: center;
+    display: inline;
+    text-decoration: none;
+    height: 100%;
+
+    &:hover {
+      text-decoration: underline;
+      text-decoration-color: white;
+      text-decoration-style: dotted;
+      cursor: pointer;
+    }
+  }
+
+  button {
+    font-size: 1.5em;
+    font-weight: bold;
+    height: 100%;
+    float: right;
+    position: absolute;
+    right: 0;
+    display: inline;
+    cursor: pointer;
+    background: none;
+    color: white;
+    border: 0 none;
+    transform: rotate(90deg);
+  }
+}
+
+// loading dots
+.loading-dots {
+  text-align: center;
+  width: 100%;
+
+  &--black {
+    background-color: #000;
+  }
+
+  &--white {
+    background-color: #FFF;
+  }
+  
+  &--dot {
+    animation: dot-keyframes 1.5s infinite ease-in-out;
+    border-radius: 10px;
+    display: inline-block;
+    height: 10px;
+    width: 10px;
+    
+    &:nth-child(2) {
+      animation-delay: .5s;
+    }
+    
+    &:nth-child(3) {
+      animation-delay: 1s;
+    }
+  }
 }

@@ -1,20 +1,34 @@
 .albumTile {
   position: relative;
-  display: inline-block;
-  width: 150px;
+  text-align: center;
+  width: 175px;
 
   .albumCover {
     z-index: 1;
-    width: 150px;
+    width: 175px;
+    height: 175px;
+
+    @media screen and (max-width: $tablet) {
+      width: 150px;
+      height: 150px;
+    }
   }
 
   .albumInfo {
     visibility: hidden;
-    padding: 1em;
-    border: 1px solid #404040;
     position: absolute;
-    left: -10px;
     z-index: 5;
+
+    min-width: 175px;
+    max-width: 300px;
+    max-height: 175px;
+    top: 85%;
+    left: 50%;
+    transform: translate(-50%, -85%);
+    padding: 1em;
+
+    border: 1px solid #404040;
+    background: rgba(255, 255, 255, 0.75)
   }
 
   &:hover {

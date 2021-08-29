@@ -10,7 +10,6 @@ import { useDebounce } from '../Util'
 export function SearchBar({ onChange, runCompare }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
-  const [artistLimit, setArtistLimit] = useState(false);
 
   // Search for artist
   const handleSearch = (value) => {
@@ -48,22 +47,21 @@ export function SearchBar({ onChange, runCompare }) {
 
   const handleChange = (valArr) => {
     if (!runCompare) {
-      onChange(valArr.slice(0,5));
-      setArtistLimit(valArr.length > 5 ? true : false);
-    } else {
-      // send an alert!
-    } 
+      onChange(valArr);
+    }
   }
 
   return (
-    <div id="searchBar">
-      <p id="lengthWarning" className={artistLimit ? '' : 'hidden'}>Too many artists, please delete one!</p>
-      <Select
-        multi
-        options={searchResults}
-        searchFn={handleSearch}
-        onChange={value => handleChange(value)}
-      />
+    <div id="search">
+      <div id="searchBar">
+        <Select
+          multi
+          options={searchResults}
+          searchFn={handleSearch}
+          onChange={value => handleChange(value)}
+          disabled={runCompare}
+        />
+      </div>   
     </div>
   )
 }

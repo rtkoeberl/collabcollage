@@ -1,20 +1,20 @@
 const Backup = require('../models/Backup')
 
 // Retrieve backup of discography from db
-const readBackup = async (artistId) => {
+const readBackup = async (id) => {
   try {
-    return await Backup.find( artistId ? {artistId: artistId} : null )
+    return await Backup.find( id ? {id: id} : null )
   } catch(e) {
     throw new Error(e.message);
   }
 }
 
 // Create backup of discography to db
-const createBackup = async (artist, artistId, releases, items) => {
+const createBackup = async (name, id, releases, items) => {
   try {
     const newBackup = await new Backup({
-      artist,
-      artistId,
+      name,
+      id,
       releases,
       items: Number(items)
     })
@@ -26,13 +26,13 @@ const createBackup = async (artist, artistId, releases, items) => {
 }
 
 // Update existing discography backup in db
-const replaceBackup = async (artist, artistId, releases, items) => {
+const replaceBackup = async (name, id, releases, items) => {
   try {
     return await Backup.updateOne(
-      { artistId: artistId },
+      { id: id },
       {
-        artist,
-        artistId,
+        name,
+        id,
         releases,
         items: Number(items)
       }
@@ -43,18 +43,18 @@ const replaceBackup = async (artist, artistId, releases, items) => {
 }
 
 // Delete backup of discography from db
-const removeBackup = async (artistId) => {
+const removeBackup = async (id) => {
   try {
-    return await Backup.deleteOne({ artistId: artistId })
+    return await Backup.deleteOne({ id: id })
   } catch(e) {
     throw new Error(e.message)
   }
 }
 
 // Retrieve backup and check if NO PUT THIS IN CONTROLLERS
-const checkBackup = async (artistId, items) => {
+const checkBackup = async (id, items) => {
   try {
-    const backup = await Backup.find({artistId: artistId})
+    const backup = await Backup.find({id: id})
     if (backup[0]) {
       if (backup[0].items != items && backup[0].date.toDateString() != new Date(Date.now).toDateString() ) {
         console.log('Backup will be updated');

@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { updateLoadProgress, deepCopy } from '../Util';
 import { AlbumTile } from './AlbumTile';
+import { LoadingDots } from './LoadingDots';
 
-export function AlbumGrid({ state: { artists, runCompare }, onGetCredits, onReset }) {
+export function AlbumGrid({ state: { artists, runCompare, hideComps, hideUnofficial, hideSidebar }, onGetCredits, onReset }) {
   const [loadPercent, setLoadPercent] = useState([]);
   const [currentArtists, setCurrentArtists] = useState([]);
   const [collabs, setCollabs] = useState([]);
-  // const [loadMsg, setLoadMsg] = useState('');
+  let loading;
+
 
   useEffect(
     () => {
       const findCollabs = () => {
-        let musicians = deepCopy(artists);
-        let collabArr = [];
+        const musicians = deepCopy(artists);
+        const collabArr = [];
     
         // Combine duplicate entries in each discography
         musicians.forEach(musician => {
@@ -39,10 +41,10 @@ export function AlbumGrid({ state: { artists, runCompare }, onGetCredits, onRese
     
         // find matching entries
         for (let i = 0; i < musicians.length - 1; i++) {
-          console.log(`Comparing ${musicians[i].name}...`)
+          // console.log(`Comparing ${musicians[i].name}...`)
           for (let j = i+1; j < musicians.length; j++) {
             if (j > i) {
-              console.log(`...with ${musicians[j].name}`)
+              // console.log(`...with ${musicians[j].name}`)
               musicians[i].releases.forEach(r1 => {
                 musicians[j].releases.forEach(r2 => {
                   // If two releases match
@@ -54,7 +56,7 @@ export function AlbumGrid({ state: { artists, runCompare }, onGetCredits, onRese
                     let exists = collabArr.filter(c => r1.id_m ? r1.id_m === c.id_m : r1.id_r === c.id_r);
                     if (exists.length) {
                       // And if so, add the missing artist to the list of collaborators
-                      console.log('Oh, this already exists!')
+                      // console.log('Oh, this already exists!')
                       let ci = collabArr.indexOf(exists[0]);
                       if (collabArr[ci].collaborators.map(r => r._id).indexOf(j) === -1) {
                         collabArr[ci].collaborators.push({
@@ -96,13 +98,13 @@ export function AlbumGrid({ state: { artists, runCompare }, onGetCredits, onRese
                 })
               })
             } else {
-              console.log(`...with nobody else!`)
+              // console.log(`...with nobody else!`)
             }
           }
         }
 
         console.log(collabArr)
-        setCollabs(collabArr);
+        setCollabs(collabArr)
       }
 
       if ( runCompare ) {
@@ -110,14 +112,13 @@ export function AlbumGrid({ state: { artists, runCompare }, onGetCredits, onRese
         const load = updateLoadProgress(artists);
         setLoadPercent(load.totalLoaded);
         findCollabs();
-        console.log(load.nextIndex)
+        // console.log(load.nextIndex)
         if (load.nextIndex !== null) {
           let { id: artistId, page } = artists[load.nextIndex];
           onGetCredits( artistId, page + 1, load.nextIndex );
         } else {
           onReset(false);
           console.log("Resetting");
-          // place logic for uploading backups to mongo here!
         }
       }
     },
@@ -129,18 +130,61 @@ export function AlbumGrid({ state: { artists, runCompare }, onGetCredits, onRese
     ]
   )
 
-  const loadAlbumInfo = (album) => {
+  const filterCollabs = (clb) => {
+    let status = true;
 
+    let isUnoff = clb.collaborators.every(clbr => clbr.roles.includes("UnofficialRelease"));
+    let isApp = clb.collaborators.some(clbr => clbr.roles.includes("Appearance"));
+
+    if (hideComps) {
+      let isMain = clb.collaborators.some(clbr => clbr.roles.includes("Main"));
+      // let isApp = clb.collaborators.some(clbr => clbr.roles.includes("Appearance"));
+      let isTrApp = clb.collaborators.some(clbr => clbr.roles.includes("TrackAppearance"));
+      let isComp = /Comp/.test(clb.format);
+      if ((isTrApp || isComp) && !isMain && !(isUnoff && isApp)) {
+        status = false
+      }
+    }
+    if (hideUnofficial) {
+      
+      if (isUnoff && !isApp) {
+        status = false
+      }
+    }
+
+    return status;
+  }
+
+  if (loadPercent.length) {
+    if (loadPercent[0] !== loadPercent[1]) {
+      loading = (
+        <div className="loadResultBox">
+          { runCompare ? <LoadingDots color="white" /> : null }
+          <p>Load Percent: {loadPercent[0]} / {loadPercent[1]}</p>
+          <p>Results: {collabs.filter(filterCollabs).length}</p>
+        </div>
+      )
+    } else {
+      if (collabs.filter(filterCollabs).length === 0) {
+        loading = (
+          <div className="loadResultBox">
+            <p><strong>No results found!</strong></p>
+          </div>
+        )
+      }
+    }
+    
+  } else {
+    loading = null;
   }
 
   return (
-    <div id="albumArea">
+    <div className={`albumArea ${hideSidebar ? 'hideSidebar--grid' : ''}`}>
       <div id="collageHeader"><h3>{currentArtists.length ? `Collaborations between ${currentArtists.slice(0, currentArtists.length-1).join(', ')}${currentArtists.length > 2 ? ',' : ''} and ${currentArtists[currentArtists.length-1]}` : null}</h3></div>
-      {loadPercent.length && loadPercent[0] !== loadPercent[1] ? <div>Load Percent: {loadPercent[0]} / {loadPercent[1]}</div> : null}
-      <div>Results: {collabs.length}</div>
+      {loading}
       <div id="albumGrid">
-        {collabs.map((album, id) => {
-          return <AlbumTile key={id} album={album} onGetInfo={loadAlbumInfo} />
+        {collabs.filter(filterCollabs).map((album, id) => {
+          return <AlbumTile key={id} album={album} />
         })}
       </div>
     </div>

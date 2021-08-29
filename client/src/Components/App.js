@@ -1,9 +1,12 @@
 import React from 'react';
 import axios from 'axios';
+import ls from 'local-storage';
 import '../Sass/app.scss'
-import { formatRelease } from '../Util'
+import { formatRelease, deepCopy } from '../Util';
 import { SearchContainer } from './SearchContainer';
-import { AlbumGrid } from './AlbumGrid'
+import { AlbumGrid } from './AlbumGrid';
+import { Header } from './Header';
+import placeholder from '../Images/placeholder.jpeg';
 
 class App extends React.Component {
   constructor(props) {
@@ -12,11 +15,19 @@ class App extends React.Component {
     this.saveArtist = this.saveArtist.bind(this);
     this.getArtistInfo = this.getArtistInfo.bind(this);
     this.getCredits = this.getCredits.bind(this);
+    this.backupData = this.backupData.bind(this);
+    this.storeHistory = this.storeHistory.bind(this);
     this.toggleCompare = this.toggleCompare.bind(this);
+    this.toggleOption = this.toggleOption.bind(this);
+    this.toggleSidebar = this.toggleSidebar.bind(this);
     
     this.state = {
       artists: [],
-      runCompare: false
+      artistHistory: ls.get('artistHistory') || [],
+      runCompare: false,
+      hideComps: true,
+      hideUnofficial: true,
+      hideSidebar: false
     }
   }
   
@@ -25,9 +36,13 @@ class App extends React.Component {
     this.setState(prevState => {
       return {
         artists: valArr.map(({label, value}) => {
-          let called = prevState.artists.map(a => a.id).indexOf(value);
-          if (called > -1) {
+          const called = prevState.artists.map(a => a.id).indexOf(value);
+          const exists = this.state.artistHistory.map(a => a.id).indexOf(value);
+    
+          if (called !== -1) {
             return prevState.artists[called];
+          } else if (exists !== -1) {
+            return this.state.artistHistory[exists];
           } else {
             this.getArtistInfo(value)
             return {
@@ -52,6 +67,8 @@ class App extends React.Component {
       name: artist.name,
       id: artist.id,
       profile: artist.profile,
+      uri: artist.uri,
+      image: artist.images ? artist.images[0].uri : placeholder,
       page: discog.pagination.page,
       pages: discog.pagination.pages,
       items: discog.pagination.items,
@@ -61,7 +78,7 @@ class App extends React.Component {
     console.log(artistInfo);
 
     // check mongo backup for this artist's discog
-    if (discog.pagination.pages >= 50) {
+    if (discog.pagination.pages >= 45) {
       let {data: backup} = await axios.get(`/api/backup/${id}`)
       if (typeof backup[0] === 'object') {
         if (
@@ -102,16 +119,62 @@ class App extends React.Component {
     let newReleases = formatRelease(newPage.releases, page);
     
     let artists = [...this.state.artists];
-    artists[i].releases = artists[i].releases.concat(newReleases);
-    artists[i].page = newPage.pagination.page;
+    let index = artists.map(a => a.id).indexOf(id);
+    if (index > -1) {
+      artists[i].releases = artists[i].releases.concat(newReleases);
+      artists[i].page = newPage.pagination.page;
 
-    this.setState({
-      artists: artists
-    });
+      this.setState({
+        artists: artists
+      });
+    }
     
   }
 
-  // Handle starting/stopping comparison requests
+  backupData(artist) {
+    const body = {
+      name: artist.name,
+      id: artist.id,
+      releases: artist.releases,
+      items: artist.items
+    }
+
+    if (artist.backupStatus === 'upload') {
+      axios.post(`/api/backup`, body);
+      console.log(`${artist.name} backup uploaded`)
+    } else if (artist.backupStatus === 'update') {
+      axios.put(`/api/backup/${artist.id}`, body)
+      console.log(`${artist.name} backup updated`)
+    }
+
+    artist.backupStatus = null;
+  }
+
+  storeHistory() {
+    const artistHistory = deepCopy(this.state.artistHistory);
+    this.state.artists.forEach(artist => {
+      const exists = artistHistory.map(a => a.id).indexOf(artist.id)
+      if (exists !== -1) {
+        let removed = artistHistory.splice(exists, 1);
+        artistHistory.unshift(removed[0]);
+      } else {
+        if (artist.pages > 1) {
+          artistHistory.unshift(deepCopy(artist));
+        }
+      }
+    })
+
+    // Save last fifteen aftists
+    const newArtistHistory = artistHistory.slice(0, 15);
+
+    this.setState({
+      artistHistory: newArtistHistory
+    })
+
+    ls.set('artistHistory', newArtistHistory);
+  }
+
+  // Handle starting/stopping comparison requests, update local storage and mongo backups
   toggleCompare(boolean) {
     if (boolean === true) {
       if (this.state.runCompare === false) {
@@ -124,15 +187,63 @@ class App extends React.Component {
     } else if ( boolean === false ){
       this.setState({ runCompare: false });
       console.log("We stopped running!")
+
+       // If artists' discographies are fully loaded, update mongo backups and local storage
+      if (this.state.artists.every(artist => artist.releases[artist.releases.length-1].key === artist.items)) {
+        this.state.artists.forEach(artist => {
+          this.backupData(artist);
+        })
+        this.storeHistory();
+      }
+      
+    }
+  }
+
+  toggleOption(option, boolean) {
+
+    if (option === "comps") {
+      if (boolean === true && this.state.hideComps === false) {
+        this.setState({hideComps: true});
+      } else if ( boolean === false && this.state.hideComps === true){
+        this.setState({hideComps: false});
+      }
+    }
+
+    if (option === "unoff") {
+      if (boolean === true && this.state.hideUnofficial === false) {
+        this.setState({hideUnofficial: true});
+      } else if ( boolean === false && this.state.hideUnofficial === true){
+        this.setState({hideUnofficial: false});
+      }
+    }
+  }
+
+  toggleSidebar(boolean) {
+    if (boolean === true) {
+      this.setState({hideSidebar: true});
+    } else {
+      this.setState({hideSidebar: false});
     }
   }
 
   render() {
     return (
       <div className="App">
-        <h1>CollabCollage</h1>
-        <SearchContainer state={this.state} onChange={this.saveArtist} onRun={this.toggleCompare} />
-        <AlbumGrid state={this.state} onGetCredits={this.getCredits} onReset={this.toggleCompare} />
+        <Header
+          toggleSidebar={this.toggleSidebar}
+        />
+        <SearchContainer
+          state={this.state}
+          onChange={this.saveArtist}
+          onRun={this.toggleCompare}
+          onHide={this.toggleOption}
+          toggleSidebar={this.toggleSidebar}
+        />
+        <AlbumGrid
+          state={this.state}
+          onGetCredits={this.getCredits} 
+          onReset={this.toggleCompare} 
+        />
       </div>
     );
   }

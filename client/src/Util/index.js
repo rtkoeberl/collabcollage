@@ -1,6 +1,14 @@
-import useDebounce from './useDebounce';
+import commaSeparate from './commaSeparate'
+import deepCopy from './deepCopy';
 import formatRelease from './formatRelease';
 import updateLoadProgress from './updateLoadProgress';
-import deepCopy from './deepCopy'
+import useDebounce from './useDebounce';
 
-export { useDebounce, formatRelease, updateLoadProgress, deepCopy };
+
+export {
+  commaSeparate,
+  deepCopy,
+  formatRelease,
+  updateLoadProgress,
+  useDebounce
+};

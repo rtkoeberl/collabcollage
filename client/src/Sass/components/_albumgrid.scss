@@ -1,9 +1,65 @@
-#albumArea {
-  margin: 0 auto;
+.albumArea {
+  height: $bodyHeight;
+  margin-left: $searchbar-width;
+  top: $headerHeight;
+  margin-top: 0;
+  position: relative;
   text-align: center;
+  transition: margin-left .5s;
+  overflow-y: auto;
+
+  > * {
+    margin: 0 auto;
+    width: 90%;
+    text-align: center;
+  }
+  
+  @media screen and (max-width: $tablet) and (min-width: $mobile) {
+    margin-left: $searchbar-width--tablet;
+  }
+
+  @media screen and (max-width: $mobile) {
+    margin-left: 0px;
+    position: absolute;
+    z-index: 0;
+    width: 100vw;
+    max-width: $mobile;
+    margin-right: 0;
+  }
+}
+
+.hideSidebar--grid {
+  margin-left: 0px;
+}
+
+#collageHeader {
+  h3 {
+    margin-top: 25px;
+  }
+}
+
+.loadResultBox {
+  background-color: $blue;
+  border-radius: 5px;
+  color: white;
+  padding: .5em;
+  margin-bottom: 15px;
+  width: 60%;
+  p {
+    margin: .25em auto;
+  }
 }
 
 #albumGrid {
+  margin: 0 auto;
+  position: relative;
   display: grid;
-  align-items: center;
+  grid-gap: 12px;
+  grid-template-columns: repeat(auto-fit, 175px);
+  justify-content: center;
+
+  @media screen and (max-width: $tablet) {
+    grid-template-columns: repeat(auto-fit, 150px);
+    justify-content: center;
+  }
 }
