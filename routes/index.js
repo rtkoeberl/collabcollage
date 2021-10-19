@@ -13,5 +13,6 @@ router.get('/discog/search/:artist', discogs.search);
 router.get('/discog/:artistId', discogs.getArtist);
 router.get('/discog/:artistId/releases', discogs.getArtistReleases);
 router.get('/discog/:artistId/releases/:page', discogs.getArtistReleasePage);
+router.get('/discog/release/:releaseId', discogs.getRelease);
 
 module.exports = router;

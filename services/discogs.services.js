@@ -40,23 +40,6 @@ const readArtistCredits = async (artistId, page) => {
   }
 }
 
-// Return compiled record of artist's credits
-const compileArtistCredits = async (artistId, page) => {
-  try {
-    console.log(`Retrieving page ${page}...`)
-    const results = await limiter.schedule(() => db.getArtistReleases(artistId, {sort: 'year', page: page, per_page: 100}))
-    let releases = results.releases;
-    if (results.pagination.page < results.pagination.pages) {
-      return releases.concat(await compileArtistCredits(artistId, page+1))
-    } else {
-      console.log(`Returning releases!`);
-      return releases;
-    }
-  } catch(e) {
-    throw new Error(e.message);
-  }
-}
-
 // Retrieve details of singular release
 const readRelease = async (releaseId) => {
   try {
@@ -70,6 +53,5 @@ module.exports = {
   searchArtists,
   readArtist,
   readArtistCredits,
-  compileArtistCredits,
   readRelease
 }

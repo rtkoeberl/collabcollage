@@ -7,7 +7,9 @@ html {
     padding: 0;
     box-sizing: border-box;
     overflow-x: hidden;
-    font-family: 'Cabin', Arial, sans-serif;
+    font-family: $font-body, Arial, -apple-system, 'Roboto', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
@@ -15,15 +17,27 @@ html {
 header {
   height: $headerHeight;
   background-color: $blue;
+  font-family: $font-head;
   color: white;
   position: fixed;
   text-align: center;
   top: 0;
   width: 100vw;
   z-index: 10;
+  border-bottom: 1px solid white;
+  
+}
+
+// buttons
+.button {
+  background: none;
+  color: white;
+  border: 0 none;
+  height: 100%;
+  display: inline-block;
 
   h1 {
-    font-size: 1.5em;
+    font-size: 1.5rem;
     line-height: $headerHeight;
     text-align: center;
     display: inline;
@@ -38,20 +52,17 @@ header {
     }
   }
 
-  button {
+  &--nav {
     font-size: 1.5em;
     font-weight: bold;
-    height: 100%;
     float: right;
     position: absolute;
     right: 0;
-    display: inline;
     cursor: pointer;
-    background: none;
-    color: white;
-    border: 0 none;
     transform: rotate(90deg);
+    
   }
+  
 }
 
 // loading dots

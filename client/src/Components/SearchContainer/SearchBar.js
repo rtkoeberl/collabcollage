@@ -1,19 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Select from 'react-dropdown-select';
-import { useDebounce } from '../Util'
+import { useDebounce } from '../../Util'
 
 // TO DO
 // https://sanusart.github.io/react-dropdown-select/prop/no-data-renderer
 // Change color of every artist past 2... although might not be a prob if i can compare more than two!
 
-export function SearchBar({ onChange, runCompare }) {
+export function SearchBar({ onChange, runCompare, artistHistory }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [historyFormatted, setHistoryFormatted] = useState([]);
+
+  useEffect(
+    () => {
+      setHistoryFormatted(artistHistory.map(a => ({
+        label: a.name,
+        value: a.id
+      })))
+    },
+    [artistHistory]
+  )
 
   // Search for artist
   const handleSearch = (value) => {
-    setSearchTerm(value.state.search)
+    if (value) {
+      setSearchTerm(value.state.search)
+    }
   }
 
   const debouncedSearchTerm = useDebounce(searchTerm, 1500)
@@ -56,7 +69,7 @@ export function SearchBar({ onChange, runCompare }) {
       <div id="searchBar">
         <Select
           multi
-          options={searchResults}
+          options={searchResults.length ? searchResults : historyFormatted}
           searchFn={handleSearch}
           onChange={value => handleChange(value)}
           disabled={runCompare}

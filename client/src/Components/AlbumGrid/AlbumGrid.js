@@ -1,13 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { updateLoadProgress, deepCopy } from '../Util';
+import { updateLoadProgress, deepCopy, commaSeparate } from '../../Util';
 import { AlbumTile } from './AlbumTile';
-import { LoadingDots } from './LoadingDots';
+import { LoadingDots } from '../LoadingDots';
 
-export function AlbumGrid({ state: { artists, runCompare, hideComps, hideUnofficial, hideSidebar }, onGetCredits, onReset }) {
+export function AlbumGrid({ state, onGetCredits, onReset }) {
   const [loadPercent, setLoadPercent] = useState([]);
   const [currentArtists, setCurrentArtists] = useState([]);
   const [collabs, setCollabs] = useState([]);
-  let loading;
+  let {
+    artists,
+    runCompare,
+    hideComps,
+    hideUnofficial,
+    hideSidebar,
+    hideVarious,
+    highlighted
+  } = state;
+  let
+    loading,
+    headline;
 
 
   useEffect(
@@ -140,19 +151,41 @@ export function AlbumGrid({ state: { artists, runCompare, hideComps, hideUnoffic
       let isMain = clb.collaborators.some(clbr => clbr.roles.includes("Main"));
       // let isApp = clb.collaborators.some(clbr => clbr.roles.includes("Appearance"));
       let isTrApp = clb.collaborators.some(clbr => clbr.roles.includes("TrackAppearance"));
-      let isComp = /Comp/.test(clb.format);
-      if ((isTrApp || isComp) && !isMain && !(isUnoff && isApp)) {
+      if (isTrApp && !isMain && !(isUnoff && isApp)) {
+        status = false
+      }
+      let isComp = clb.format ? clb.format.includes("Comp") : false;
+      if (isComp) {
         status = false
       }
     }
+
     if (hideUnofficial) {
-      
       if (isUnoff && !isApp) {
         status = false
       }
     }
 
+    if (hideVarious) {
+      if (clb.artist === "Various" || clb.artist === "Unknown" || clb.artist === "Unknown Artist") {
+        status = false
+      }
+    }
+
+    if (highlighted.id) {
+      let featuresHighlighted = clb.collaborators.some(clbr => clbr.id === highlighted.id);
+      if (!featuresHighlighted) {
+        status = false;
+      }
+    }
+
     return status;
+  }
+
+  function sortByYear(a, b) {
+    if (a.year < b.year) return -1;
+    if (a.year > b.year) return 1;
+    return 0;
   }
 
   if (loadPercent.length) {
@@ -171,20 +204,36 @@ export function AlbumGrid({ state: { artists, runCompare, hideComps, hideUnoffic
             <p><strong>No results found!</strong></p>
           </div>
         )
+      } else {
+        loading = (
+          <div className="loadResultBox">
+            <p>Results: {collabs.filter(filterCollabs).length}</p>
+          </div>
+        )
       }
     }
     
   } else {
-    loading = null;
+    loading = null; // Place a welcome message here!
+  }
+  
+  // Set Banner Message
+  if (currentArtists.length) {
+    if (highlighted.name === null) {
+      headline = `Collaborations between ${commaSeparate(currentArtists)}`;
+    } else {
+      headline = `Collaborations between ${highlighted.name} and either ${commaSeparate(currentArtists.filter(e => e !== highlighted.name), 'or')}`
+    }
+    
   }
 
   return (
     <div className={`albumArea ${hideSidebar ? 'hideSidebar--grid' : ''}`}>
-      <div id="collageHeader"><h3>{currentArtists.length ? `Collaborations between ${currentArtists.slice(0, currentArtists.length-1).join(', ')}${currentArtists.length > 2 ? ',' : ''} and ${currentArtists[currentArtists.length-1]}` : null}</h3></div>
+      <div id="collageHeader"><h3>{headline}</h3></div>
       {loading}
       <div id="albumGrid">
-        {collabs.filter(filterCollabs).map((album, id) => {
-          return <AlbumTile key={id} album={album} />
+        {collabs.filter(filterCollabs).sort(sortByYear).map((album, id) => {
+          return <AlbumTile key={id} album={album} loadPercent={loadPercent} />
         })}
       </div>
     </div>

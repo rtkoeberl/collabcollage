@@ -15,12 +15,15 @@
   display: flex;
   align-items: center;
   gap: 15px;
+  margin: 3px;
   margin-bottom: 10px;
 
   padding: 10px;
   white-space: pre-wrap;
   text-align: left;
   background-color: whitesmoke;
+  outline: none;
+  transition: outline 500ms;
 
   .artistImgBox {
     flex: 1;
@@ -41,7 +44,17 @@
     font-size: .8em;
   }
 
-  // &.complete {
-  //   background-color: whitesmoke;
-  // }
+  .highlightBtn {
+    height: 100%;
+    margin-top: 0px;
+    margin-bottom: auto;
+  }
+}
+
+.complete {
+  border: 1px dotted $color-secondary;
+}
+
+.highlight {
+  outline: 3px dashed $blue;
 }

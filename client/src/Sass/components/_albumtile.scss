@@ -1,7 +1,13 @@
 .albumTile {
   position: relative;
-  text-align: center;
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
   width: 175px;
+
+  @media screen and (max-width: $tablet) {
+    width: 150px;
+  }
 
   .albumCover {
     z-index: 1;
@@ -15,29 +21,76 @@
   }
 
   .albumInfo {
-    visibility: hidden;
+    display: none;
     position: absolute;
     z-index: 5;
 
-    min-width: 175px;
-    max-width: 300px;
-    max-height: 175px;
-    top: 85%;
+    // min-width: 175px;
+    // max-width: 300px;
+    // max-height: 175px;
+    top: 0;
     left: 50%;
-    transform: translate(-50%, -85%);
-    padding: 1em;
+    transform: translateX(-50%);
+    // margin: 20px 0 40px 0;
+    padding-top: 25px;
 
-    border: 1px solid #404040;
-    background: rgba(255, 255, 255, 0.75)
+    // 
+    // background: rgba(255, 255, 255, 0.75)
   }
 
   &:hover {
     cursor: pointer;
 
     .albumInfo {
-      visibility: visible;
+      animation: tooltipFadeIn 0.15s;
+      display: block;
     }
   }
 }
+
+.albumInfo_content {
+  background-color: $color-secondary;
+  border: 1px solid #404040;
+  border-radius: 4px;
+  padding: 8px 12px;
+  width: 50vw;
+  min-width: 150px;
+  max-width: 200px;
+  text-align: left;
+
+  .infoButton {
+    position: relative;
+    margin: 0 auto;
+    text-align: center;
+
+    button {
+      background-color: $blue;
+      width: 100px;
+      color: white;
+      font-weight: bold;
+      border: none;
+      padding: 5px;
+      border-radius: 2.5px;
+      cursor: pointer;
+    }
+  }
+
+  @media screen and (max-width: $tablet) {
+    max-width: 175px;
+    font-size: .8em;
+  }
+}
+
+
+
+@media (hover: hover) {
+  .albumTile:hover {
+    .albumInfo {
+      animation: tooltipFadeIn 0.15s;
+      display: block;
+    }
+  }
+}
+
 
 /* Show the tooltip text when you mouse over the tooltip container */

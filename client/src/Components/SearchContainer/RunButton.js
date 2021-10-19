@@ -2,15 +2,16 @@ import React, { useState, useEffect } from 'react';
 
 export function RunButton ({ artists, runCompare, onRun, toggleSidebar }) {
   const [canSearch, setCanSearch] = useState(false);
-  const [buttonMessage, setButtonMessage] = useState('Add Artists to Begin')
+  const [buttonMessage, setButtonMessage] = useState('Add Artists to Begin');
+  let artistLimit = 8;
 
   useEffect(
     () => {
       if (!runCompare) {
-        if (artists.length > 5) {
+        if (artists.length > artistLimit) {
           setCanSearch(false);
           setButtonMessage('Too many artists, please delete one!');
-        } else if (artists.length > 1 && artists.length <= 5) {
+        } else if (artists.length > 1 && artists.length <= artistLimit) {
           if (artists.every(a => a.releases.length)) {
             setCanSearch(true);
             setButtonMessage('Generate Discog')

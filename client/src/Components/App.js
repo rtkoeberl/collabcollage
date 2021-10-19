@@ -3,9 +3,10 @@ import axios from 'axios';
 import ls from 'local-storage';
 import '../Sass/app.scss'
 import { formatRelease, deepCopy } from '../Util';
-import { SearchContainer } from './SearchContainer';
-import { AlbumGrid } from './AlbumGrid';
+import { SearchContainer } from './SearchContainer/SearchContainer';
+import { AlbumGrid } from './AlbumGrid/AlbumGrid';
 import { Header } from './Header';
+import { PopUp } from './PopUp';
 import placeholder from '../Images/placeholder.jpeg';
 
 class App extends React.Component {
@@ -20,6 +21,8 @@ class App extends React.Component {
     this.toggleCompare = this.toggleCompare.bind(this);
     this.toggleOption = this.toggleOption.bind(this);
     this.toggleSidebar = this.toggleSidebar.bind(this);
+    this.togglePopUp = this.togglePopUp.bind(this);
+    this.highlightArtist = this.highlightArtist.bind(this);
     
     this.state = {
       artists: [],
@@ -27,7 +30,13 @@ class App extends React.Component {
       runCompare: false,
       hideComps: true,
       hideUnofficial: true,
-      hideSidebar: false
+      hideVarious: true,
+      hideSidebar: false,
+      showPopUp: false,
+      highlighted: {
+        name: null,
+        id: null
+      }
     }
   }
   
@@ -42,6 +51,7 @@ class App extends React.Component {
           if (called !== -1) {
             return prevState.artists[called];
           } else if (exists !== -1) {
+            console.log(this.state.artistHistory[exists])
             return this.state.artistHistory[exists];
           } else {
             this.getArtistInfo(value)
@@ -82,7 +92,7 @@ class App extends React.Component {
       let {data: backup} = await axios.get(`/api/backup/${id}`)
       if (typeof backup[0] === 'object') {
         if (
-          backup[0].items !== discog.pagination.items &&
+          ( backup[0].items + 15 ) < discog.pagination.items &&
           new Date(backup[0].date).toLocaleDateString !== Date.now().toLocaleDateString
         ) {
           console.log(`Backup for ${artist.name} to update`)
@@ -128,7 +138,6 @@ class App extends React.Component {
         artists: artists
       });
     }
-    
   }
 
   backupData(artist) {
@@ -153,25 +162,42 @@ class App extends React.Component {
   storeHistory() {
     const artistHistory = deepCopy(this.state.artistHistory);
     this.state.artists.forEach(artist => {
-      const exists = artistHistory.map(a => a.id).indexOf(artist.id)
+      const exists = artistHistory.map(a => a.id).indexOf(artist.id);
       if (exists !== -1) {
+        console.log(`Updating ${artist.name} in local history`)
         let removed = artistHistory.splice(exists, 1);
         artistHistory.unshift(removed[0]);
       } else {
         if (artist.pages > 1) {
+          console.log(`Storing ${artist.name} to local history`)
           artistHistory.unshift(deepCopy(artist));
         }
       }
     })
 
     // Save last fifteen aftists
-    const newArtistHistory = artistHistory.slice(0, 15);
+    const newArtistHistory = artistHistory.slice(0, 12);
+
+    ls.set('artistHistory', newArtistHistory);
 
     this.setState({
       artistHistory: newArtistHistory
     })
+  }
 
-    ls.set('artistHistory', newArtistHistory);
+  // Highlight artist
+  highlightArtist(artist, current) {
+    if (artist.id === current.id) {
+      this.setState({highlighted: {
+        name: null,
+        id: null
+      }})
+    } else {
+      this.setState({highlighted: {
+        name: artist.name,
+        id: artist.id
+      }})
+    }
   }
 
   // Handle starting/stopping comparison requests, update local storage and mongo backups
@@ -189,18 +215,19 @@ class App extends React.Component {
       console.log("We stopped running!")
 
        // If artists' discographies are fully loaded, update mongo backups and local storage
-      if (this.state.artists.every(artist => artist.releases[artist.releases.length-1].key === artist.items)) {
+      if (this.state.artists.every(artist => artist.page === artist.pages)) {
+        console.log("Storing history!")
+        this.storeHistory();
+
         this.state.artists.forEach(artist => {
           this.backupData(artist);
         })
-        this.storeHistory();
       }
       
     }
   }
 
   toggleOption(option, boolean) {
-
     if (option === "comps") {
       if (boolean === true && this.state.hideComps === false) {
         this.setState({hideComps: true});
@@ -216,6 +243,14 @@ class App extends React.Component {
         this.setState({hideUnofficial: false});
       }
     }
+
+    if (option === "various") {
+      if (boolean === true && this.state.hideVarious === false) {
+        this.setState({hideVarious: true});
+      } else if ( boolean === false && this.state.hideVarious === true){
+        this.setState({hideVarious: false});
+      }
+    }
   }
 
   toggleSidebar(boolean) {
@@ -226,11 +261,20 @@ class App extends React.Component {
     }
   }
 
+  togglePopUp(boolean) {
+    if (boolean === true) {
+      this.setState({showPopUp: true});
+    } else {
+      this.setState({showPopUp: false});
+    }
+  }
+
   render() {
     return (
       <div className="App">
         <Header
           toggleSidebar={this.toggleSidebar}
+          togglePopUp={this.togglePopUp}
         />
         <SearchContainer
           state={this.state}
@@ -238,11 +282,16 @@ class App extends React.Component {
           onRun={this.toggleCompare}
           onHide={this.toggleOption}
           toggleSidebar={this.toggleSidebar}
+          highlightArtist={this.highlightArtist}
         />
         <AlbumGrid
           state={this.state}
           onGetCredits={this.getCredits} 
           onReset={this.toggleCompare} 
+        />
+        <PopUp
+          showPopUp={this.state.showPopUp}
+          togglePopUp={this.togglePopUp}
         />
       </div>
     );

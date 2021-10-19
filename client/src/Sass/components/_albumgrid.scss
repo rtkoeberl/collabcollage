@@ -7,6 +7,9 @@
   text-align: center;
   transition: margin-left .5s;
   overflow-y: auto;
+  overflow-x: visible;
+  margin-bottom: 2vh;
+  z-index: 1;
 
   > * {
     margin: 0 auto;
@@ -21,7 +24,6 @@
   @media screen and (max-width: $mobile) {
     margin-left: 0px;
     position: absolute;
-    z-index: 0;
     width: 100vw;
     max-width: $mobile;
     margin-right: 0;
@@ -35,6 +37,7 @@
 #collageHeader {
   h3 {
     margin-top: 25px;
+    margin-bottom: 15px;
   }
 }
 
@@ -57,6 +60,11 @@
   grid-gap: 12px;
   grid-template-columns: repeat(auto-fit, 175px);
   justify-content: center;
+  height: 100%;
+  padding-bottom: 25px;
+  margin-bottom: 20px;
+
+
 
   @media screen and (max-width: $tablet) {
     grid-template-columns: repeat(auto-fit, 150px);

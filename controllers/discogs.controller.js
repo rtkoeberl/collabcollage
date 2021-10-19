@@ -5,7 +5,6 @@ const {
   searchArtists,
   readArtist,
   readArtistCredits,
-  compileArtistCredits,
   readRelease
 } = discogsService;
 
@@ -14,11 +13,6 @@ const search = (req, res) => {
   const { artist } = req.params;
   searchArtists(artist)
     .then(results => {
-      // .then(data => {
-      //   return data.results.foreach(result => {
-      //     (I want result.id and result.title and maybe result.cover_image)
-      //    })
-      //  });
       console.log('Search results retrieved')
       res.json(results);
     })
@@ -60,48 +54,21 @@ const getArtistReleasePage = async (req, res) => {
   }
 }
 
-// Recursive call to retrieve entire discography through a single request -- do not use
-/* const compileReleases = async (id, page = 1) => {
+// Get release
+const getRelease = async (req, res) => {
   try {
-    const { artistId }  = req.params;
-    const { artist } = req.body;
-    let backup;
-    // if (session history contains id) { pull from there and return }
-    const results = await readArtistCredits(artistId)
-    console.log(`Searching Discogs for ${artist}\n${results.pagination.pages} pages of results / ${results.pagination.items} items`);
-    let  { releases } = results;
-
-    // hold off on this until you successfully update the arcade fire backup
-    if (results.pagination.pages >= 50) {
-      backup = await backupService.checkBackup(artistId)
-      if (typeof backup === 'object') {
-        // figure out a way to return backup and update in background
-        console.log('Returning backup')
-        return res.json(backup);
-      }
-    }
-    
-    if (results.pagination.page < results.pagination.pages) {
-      releases = releases.concat(await compileArtistCredits(artistId, 2));
-    }
-
-    if (backup == "update") {
-      backupService.replaceBackup(artist, artistId, releases, releases.length);
-      console.log(`Backup for ${artist} updated`);
-    } else if (backup == "upload") {
-      backupService.createBackup(artist, artistId, releases, releases.length);
-      console.log(`Backup for ${artist} created`);
-    }
-
-    res.json(releases);
+    const { releaseId }  = req.params;
+    const releaseInfo = await readRelease(releaseId)
+    res.json(releaseInfo); 
   } catch {
     err => res.status(400).json('Error: ' + err)
   }
-} */
+};
 
 module.exports = {
   search,
   getArtist,
   getArtistReleases,
-  getArtistReleasePage
+  getArtistReleasePage,
+  getRelease
 }

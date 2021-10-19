@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export function Header({ toggleSidebar }) {
+export function Header({ toggleSidebar, togglePopUp }) {
   const [sidebarHidden, hideSidebar] = useState(false);
 
   const handleToggle = () => {
@@ -15,8 +15,10 @@ export function Header({ toggleSidebar }) {
 
   return (
     <header>
-      <h1>CollabCollage</h1>
-      <button onClick={() => handleToggle()}>
+      <button className="button button--h1" onClick={() => togglePopUp(true)}>
+        <h1>CollabCollage</h1>
+      </button>
+      <button className="button button--nav" onClick={() => handleToggle()}>
         <p className="menuIcon">|||</p>
       </button>
     </header>
