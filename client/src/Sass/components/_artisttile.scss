@@ -42,6 +42,30 @@
 
   .excerpt {
     font-size: .8em;
+
+    &--text {
+      padding-bottom: .5em;
+    }
+
+    &--button {
+      text-align: center;
+      position: relative;
+      width: 100px;
+      background-color: $blue;
+      font-weight: bold;
+      border: none;
+      // 
+      border-radius: 2.5px;
+      // cursor: pointer;
+
+      a {
+        display: inline-block;
+        padding: 5px;
+        text-decoration: none;
+        color: white;
+
+      }
+    }
   }
 
   .highlightBtn {

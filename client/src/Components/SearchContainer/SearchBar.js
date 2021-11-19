@@ -73,6 +73,7 @@ export function SearchBar({ onChange, runCompare, artistHistory }) {
           searchFn={handleSearch}
           onChange={value => handleChange(value)}
           disabled={runCompare}
+          placeholder="Search for artists here..."
         />
       </div>   
     </div>

@@ -50,7 +50,16 @@ export function ArtistTile({ artist, length, highlightArtist, highlighted }) {
       </div>
       <div className="artistInfoBox">
         <p><strong>{name}</strong></p>
-        {artist.uri ? <p className='excerpt'>{excerpt}<a href={artist.uri} target="_blank" rel="noreferrer">[...]</a></p> : null}
+        {artist.uri &&
+          <div className="excerpt">
+            <div className='excerpt--text'>
+              <p>{excerpt}</p>
+            </div>
+            <div className="excerpt--button">
+              <a href={artist.uri} target="_blank" rel="noreferrer">Read More...</a>
+            </div>
+          </div>
+        }
       </div>
       {highlightButton}
     </div>

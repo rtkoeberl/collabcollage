@@ -233,7 +233,7 @@ export function AlbumGrid({ state, onGetCredits, onReset }) {
       {loading}
       <div id="albumGrid">
         {collabs.filter(filterCollabs).sort(sortByYear).map((album, id) => {
-          return <AlbumTile key={id} album={album} loadPercent={loadPercent} />
+          return <AlbumTile key={id} album={album} />
         })}
       </div>
     </div>

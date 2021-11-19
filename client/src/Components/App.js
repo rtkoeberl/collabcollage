@@ -26,13 +26,13 @@ class App extends React.Component {
     
     this.state = {
       artists: [],
-      artistHistory: ls.get('artistHistory') || [],
+      artistHistory: JSON.parse(ls.get('artistHistory')) || [],
       runCompare: false,
       hideComps: true,
       hideUnofficial: true,
       hideVarious: true,
       hideSidebar: false,
-      showPopUp: false,
+      showPopUp: ls.get('returnVisit') ? false : true,
       highlighted: {
         name: null,
         id: null
@@ -175,14 +175,15 @@ class App extends React.Component {
       }
     })
 
-    // Save last fifteen aftists
+    // Save last fifteen aftists to state AND local storage
     const newArtistHistory = artistHistory.slice(0, 12);
-
-    ls.set('artistHistory', newArtistHistory);
 
     this.setState({
       artistHistory: newArtistHistory
     })
+
+    ls.set('artistHistory', JSON.stringify(newArtistHistory));
+
   }
 
   // Highlight artist

@@ -2,10 +2,8 @@ import axios from 'axios';
 import React from 'react';
 import { commaSeparate } from '../../Util';
 
-export function AlbumTile ({ album, loadPercent }) {
-  let loaded = loadPercent[0] === loadPercent[1] ? true : false;
-  let infoButton, artistFormatted;
-
+export function AlbumTile ({ album }) {
+  let artistFormatted;
   if (album.artist.length > 100) {
     artistFormatted = album.artist.slice(0,100) + '...';
   } else {
@@ -49,25 +47,15 @@ export function AlbumTile ({ album, loadPercent }) {
     console.log(releaseInfo);
   }
 
-
-  if (loaded) {
-    infoButton = (
-      <div className="infoButton">
-        <button onClick={() => getReleaseLink()}>Learn More</button>
-      </div>
-    )
-  } else {
-    infoButton = ''
-  }
-  
-
   return (
     <div className="albumTile">
       <img className="albumCover" src={album.thumb} alt={album.title} />
       <div className="albumInfo">
         <div className="albumInfo_content">
           <p><strong>{`${album.title} by ${artistFormatted}${album.year ? ` (${album.year})` : ''}`}</strong> {albumInfo()}</p>
-          {infoButton}
+          <div className="infoButton">
+            <button onClick={() => getReleaseLink()}>View on<br />Discogs</button>
+          </div>
         </div>
       </div>
     </div>

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 export function RunButton ({ artists, runCompare, onRun, toggleSidebar }) {
   const [canSearch, setCanSearch] = useState(false);
   const [buttonMessage, setButtonMessage] = useState('Add Artists to Begin');
-  let artistLimit = 8;
+  let artistLimit = 10;
 
   useEffect(
     () => {
@@ -26,7 +26,7 @@ export function RunButton ({ artists, runCompare, onRun, toggleSidebar }) {
       } else {
         setButtonMessage('Stop Search')
       }
-    }, [artists, runCompare]
+    }, [artists, runCompare, artistLimit]
   )
 
   const handleRun = () => {
