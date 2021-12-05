@@ -1,6 +1,6 @@
 .popUp {
   position: fixed;
-  z-index: 20;
+  z-index: 30;
   left: 0;
   top: 0;
   width: 100vw;
@@ -20,6 +20,11 @@
     > * {
       padding-left: 15px;
       padding-right: 15px;
+
+      @media screen and (max-width: $tablet) {
+        padding-left: 30px;
+        padding-right: 30px;
+      }
     }
 
     h3 {

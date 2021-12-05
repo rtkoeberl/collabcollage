@@ -19,7 +19,7 @@ export function ArtistTile({ artist, length, highlightArtist, highlighted }) {
       .replace(/\r\n\r\n/g, '\n');
     
     if (profile.length > strLength) {
-      excerpt = profile.substring(0,strLength).replace(/[.(\r\n)]*\s+[\w\d]+(\r\n)*$/i, ' ');
+      excerpt = profile.substring(0,strLength).replace(/[.(\r\n)]*\s+[\w\d]+(\r\n)*$/i, ' ').concat('...');
     } else {
       excerpt = profile.replace(/(\r\n)*$/, ' ');
     }
@@ -34,6 +34,7 @@ export function ArtistTile({ artist, length, highlightArtist, highlighted }) {
           checked={highlighted.id === artist.id}
           onChange={() => highlightArtist(artist, highlighted)}
         />
+        <label>View only collaborations with {name}</label>
       </div>
       
     );
@@ -56,7 +57,7 @@ export function ArtistTile({ artist, length, highlightArtist, highlighted }) {
               <p>{excerpt}</p>
             </div>
             <div className="excerpt--button">
-              <a href={artist.uri} target="_blank" rel="noreferrer">Read More...</a>
+              <a href={artist.uri} target="_blank" rel="noreferrer">Read More</a>
             </div>
           </div>
         }

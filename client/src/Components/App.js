@@ -42,6 +42,16 @@ class App extends React.Component {
   
   // Update artists state with name/id from SearchBar, and call API to fill in additional info if needed
   saveArtist(valArr)  {
+    if (this.state.highlighted.id && valArr.map(a => a.value).indexOf(this.state.highlighted.id) === -1) {
+      console.log('The highlighted artist has been deleted!')
+      this.setState({
+        highlighted: {
+          name: null,
+          id: null
+        }
+      })
+    }
+
     this.setState(prevState => {
       return {
         artists: valArr.map(({label, value}) => {
@@ -160,6 +170,7 @@ class App extends React.Component {
   }
 
   storeHistory() {
+    // Deep copy the current artist history
     const artistHistory = deepCopy(this.state.artistHistory);
     this.state.artists.forEach(artist => {
       const exists = artistHistory.map(a => a.id).indexOf(artist.id);
@@ -175,15 +186,18 @@ class App extends React.Component {
       }
     })
 
+    console.log(artistHistory);
+
     // Save last fifteen aftists to state AND local storage
-    const newArtistHistory = artistHistory.slice(0, 12);
+    const newArtistHistory = artistHistory.slice(0, 15);
 
     this.setState({
       artistHistory: newArtistHistory
     })
 
+    ls.remove('artistHistory');
     ls.set('artistHistory', JSON.stringify(newArtistHistory));
-
+    console.log(JSON.parse(ls.get('artistHistory')));
   }
 
   // Highlight artist

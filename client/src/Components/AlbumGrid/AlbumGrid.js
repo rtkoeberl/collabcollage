@@ -114,7 +114,7 @@ export function AlbumGrid({ state, onGetCredits, onReset }) {
           }
         }
 
-        console.log(collabArr)
+        // console.log(collabArr)
         setCollabs(collabArr)
       }
 

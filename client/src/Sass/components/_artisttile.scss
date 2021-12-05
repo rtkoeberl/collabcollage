@@ -3,11 +3,11 @@
   bottom: 0;
   
   overflow-y: auto;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  // -ms-overflow-style: none;
+  scrollbar-width: thin;
+  // &::-webkit-scrollbar {
+  //   display: none;
+  // }
   
 }
 
@@ -72,6 +72,23 @@
     height: 100%;
     margin-top: 0px;
     margin-bottom: auto;
+
+    input + label {
+      display: none;
+    }
+
+    input:hover + label {
+      display: inline-block;
+      transition: display 500ms;
+      position: absolute;
+      right: calc(7.5% + 33px);
+      width: auto;
+      border: 1px solid black;
+      background: white;
+      font-size: 10px;
+      margin-top: -3px;
+      padding: 5px;
+    }
   }
 }
 
