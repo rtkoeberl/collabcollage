@@ -60,11 +60,9 @@
   grid-gap: 12px;
   grid-template-columns: repeat(auto-fit, 175px);
   justify-content: center;
-  height: 100%;
+  height: auto;
   padding-bottom: 25px;
   margin-bottom: 20px;
-
-
 
   @media screen and (max-width: $tablet) {
     grid-template-columns: repeat(auto-fit, 150px);
