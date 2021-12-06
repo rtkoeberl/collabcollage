@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors')
 const mongoose = require('mongoose');
+const path = require('path');
 
 require('dotenv').config();
 
@@ -23,6 +24,16 @@ mongoose.connect(uri, { useNewUrlParser: true, useCreateIndex: true, useUnifiedT
 // Routes
 const routes = require('./routes');
 app.use('/api', routes);
+
+// Serve static assets if in production
+if (process.env.NODE_ENV === 'production') {
+  // Set static folder
+  app.use(express.static('client/build'));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'))
+  })
+}
 
 let server = app.listen(port, () => {
   console.log(`Server is listening on port: ${port}`);
