@@ -2,6 +2,9 @@
   "name": "collabcollage",
   "version": "1.0.0",
   "description": "CollabCollage uses the Discogs API to search and compare different musicians' discographies to discover and chart all the collaborations and connections between their careers!",
+  "engines": {
+    "node": "12.x"
+  },
   "main": "server.js",
   "scripts": {
     "client-install": "npm install --prefix client",

@@ -4,7 +4,7 @@ $blue: #1880DB;
 $color-secondary: #eee;
 
 $headerHeight: 50px;
-$bodyHeight: calc(100vh - $headerHeight);
+$bodyHeight: calc(100vh - 50px);
 
 $searchbar-width: 37.5vw;
 $searchbar-width--tablet: 50vw;
