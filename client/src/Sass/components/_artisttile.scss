@@ -1,31 +1,12 @@
+
 #artistTiles {
   bottom: 0;
-  margin: 0 7.5% 20px 7.5%;
-  // margin-right: -7px;
-  height: auto;
+  margin: 0 auto;
+  margin-bottom: 5px;
+  // height: auto;
+  flex: 1;
   position: relative;
-  overflow-y: auto;
-}
-
-.artistTilesScroll {
-  // mask-image: linear-gradient(to top, transparent, black), linear-gradient(to left, transparent 17px, black 17px);
-  // -webkit-mask-image: linear-gradient(to top, transparent, black), linear-gradient(to left, transparent 17px, black 17px);
-  mask-size: 100% 20000px;
-  -webkit-mask-size: 100% 20000px;
-  mask-position: left bottom;
-  -webkit-mask-position: left bottom;
-  transition: mask-position 0.3s, -webkit-mask-position 0.3s;
-  
-  &:hover {
-    mask-position: left top;
-    -webkit-mask-position: left top;
-  }
-}
-
-#clearButton {
-  width: 100%;
-  height: 50px;
-  background-color: green
+  overflow-y: scroll;
 }
 
 .artistTile {

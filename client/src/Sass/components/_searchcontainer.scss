@@ -10,6 +10,7 @@
   flex-direction: column;
   gap: 10px;
   padding-top: 25px;
+  margin-bottom: 10px;
 
   background-color: $color-secondary;
   overflow: hidden;
@@ -41,8 +42,10 @@
 }
 
 #toolbar,
-#runButton {
+#runButton,
+#clearButton {
   max-width: 300px;
+  margin: 0 auto;
 }
 
 #toolbar {
@@ -52,11 +55,16 @@
   }
 }
 
-#runButton {
+#runButton, #clearButton {
   .btn {
     width: 100%;
     padding: 7px 15px;
     font-size: 1rem;
     background-color: $color-primary;
   }
+}
+
+#clearButton {
+  width: 100%;
+  margin-bottom: 25px;
 }

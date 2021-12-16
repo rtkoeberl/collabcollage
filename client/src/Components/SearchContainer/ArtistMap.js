@@ -1,55 +1,73 @@
-import React, { useState, useEffect, createRef } from 'react';
+import React, { useState, useEffect, useCallback, createRef } from 'react';
 import { ArtistTile } from './ArtistTile';
+import { TempScrollBox } from '../../Util';
 
 export function ArtistMap({artists, highlighted, highlightArtist}) {
-  const [scrollWidth, setScrollWidth] = useState(0);
+  const [scrollable, setScrollable] = useState(false);
+  const [hovering, setHovering] = useState(false);
   const artistRef = createRef();
   const buttonRef = createRef();
-  // let scrollWidth = 0;
   let clearButton;
 
-  useEffect(() => {
-    if (buttonRef.current) {
-      let clientHeight = artistRef.current.clientHeight; 
-      let scrollHeight = artistRef.current.scrollHeight;
-      if (clientHeight < scrollHeight) {
-        console.log('big');
-        setScrollWidth(artistRef.current.offsetWidth - buttonRef.current.offsetWidth);
-      } else {
-        setScrollWidth(0);
-      }
-      
+  let scrollbox = new TempScrollBox();
+  let scrollWidth = scrollbox.width;
+
+  const getListSize = useCallback(() => {
+    const clientHeight = artistRef.current.clientHeight;
+    const scrollHeight = artistRef.current.scrollHeight;
+
+    if (clientHeight < scrollHeight) {
+      setScrollable(true);
+    } else {
+      setScrollable(false);
     }
-  }, [buttonRef, artistRef, setScrollWidth])
+  }, [artistRef]);
+  
+  // Update client & scroll dimensions when artist list updates
+  useEffect(() => {
+    getListSize();
+  }, [artists, getListSize]);
 
-  // const setScroll = (width) => {
-  //   setScrollWidth(width);
-  // }
+  // Update client & scroll dimensions when the window resizes
+  useEffect(() => {
+    window.addEventListener("resize", getListSize);
+    return window.removeEventListener("resize", getListSize);
+  }, [getListSize]);
 
+  const handleMouseEnter = (event) => {
+    scrollable && setHovering(true);
+  }
+  const handleMouseLeave = (event) => {
+    scrollable && setHovering(false);
+  }
 
   if (artists.length) {
     clearButton = (
       <div id="clearButton" ref={buttonRef}>
-        <button>Clear all artists</button>
+        <button className='btn'>Clear all artists</button>
       </div>
     )
   } else {
     clearButton = '';
   }
 
-  let artistRefStyle = {
-    width: `calc(85% + ${scrollWidth}px)`,
-    marginRight: `calc(7.5% - ${scrollWidth}px)`,
-    maskImage: `linear-gradient(to top, transparent, black), linear-gradient(to left, transparent ${scrollWidth}px, black ${scrollWidth}px)`,
-    WebkitMaskImage: `linear-gradient(to top, transparent, black), linear-gradient(to left, transparent ${scrollWidth}px, black ${scrollWidth}px)`,
-  }
-
   return (
     <div
       id="artistTiles"
-      className={scrollWidth > 0 && '.artistTilesScroll'}
       ref={artistRef}
-      style={artistRefStyle}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        width: `calc(85% + ${scrollWidth}px)`,
+        marginRight: `calc(7.5% - ${scrollWidth}px)`,
+        maskImage: `linear-gradient(to top, transparent, black), linear-gradient(to left, transparent ${scrollWidth}px, black ${scrollWidth}px)`,
+        WebkitMaskImage: `linear-gradient(to top, transparent, black), linear-gradient(to left, transparent ${scrollWidth}px, black ${scrollWidth}px)`,
+        maskSize: '100% 10000%',
+        WebkitMaskSize: '100% 10000%',
+        maskPosition: hovering ? 'left top' : 'left bottom',
+        WebkitMaskPosition: hovering ? 'left top' : 'left bottom',
+        transition: 'mask-position 0.3s, -webkit-mask-position 0.3s'
+      }}
     >
       {artists.map(artist =>
         (<ArtistTile
