@@ -162,7 +162,7 @@ class App extends React.Component {
       axios.post(`/api/backup`, body);
       console.log(`${artist.name} backup uploaded`)
     } else if (artist.backupStatus === 'update') {
-      axios.put(`/api/backup/${artist.id}`, body)
+      axios.post(`/api/backup/${artist.id}`, body)
       console.log(`${artist.name} backup updated`)
     }
 
