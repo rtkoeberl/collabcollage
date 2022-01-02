@@ -53,8 +53,11 @@ export function AlbumTile ({ album }) {
       <div className="albumInfo">
         <div className="albumInfo_content">
           <p><strong>{`${album.title} by ${artistFormatted}${album.year ? ` (${album.year})` : ''}`}</strong> {albumInfo()}</p>
-          <div className="infoButton">
+          {/* <div className="infoButton">
             <button onClick={() => getReleaseLink()}>View on<br />Discogs</button>
+          </div> */}
+          <div className="link-btn">
+            <p onClick={() => getReleaseLink()}>View on<br />Discogs</p>
           </div>
         </div>
       </div>

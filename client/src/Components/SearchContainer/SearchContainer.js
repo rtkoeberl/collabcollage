@@ -10,7 +10,7 @@ export function SearchContainer({ state, onChange, onRun, onHide, toggleSidebar,
   
   return (
     <div className={`searchContainer ${hideSidebar ? 'hideSidebar--search' : ''}`}>
-      <SearchBar onChange={onChange} runCompare={runCompare} artistHistory={artistHistory}/>
+      <SearchBar onChange={onChange} runCompare={runCompare} artistHistory={artistHistory} />
       <RunButton artists={artists} runCompare={runCompare} onRun={onRun} toggleSidebar={toggleSidebar} />
       <Toolbar state={state} onHide={onHide} />
       <ArtistMap artists={artists} highlighted={highlighted} highlightArtist={highlightArtist} />

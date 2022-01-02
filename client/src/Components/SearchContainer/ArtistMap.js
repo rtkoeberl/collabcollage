@@ -1,39 +1,44 @@
-import React, { useState, useEffect, useCallback, createRef } from 'react';
+import React, { useState, useEffect, createRef } from 'react';
 import { ArtistTile } from './ArtistTile';
 import { TempScrollBox } from '../../Util';
 
 export function ArtistMap({artists, highlighted, highlightArtist}) {
-  const [scrollable, setScrollable] = useState(false);
   const [hovering, setHovering] = useState(false);
+  const [overlayOn, setOverlayOn] = useState(false);
+  const [clientHeightx, setClientHeight] = useState(0);
+  const [scrollHeightx, setScrollHeight] = useState(0);
+  const [scrollWidth, setScrollWidth] = useState(0);
   const artistRef = createRef();
-  const buttonRef = createRef();
-  let clearButton;
-
-  let scrollbox = new TempScrollBox();
-  let scrollWidth = scrollbox.width;
-
-  const getListSize = useCallback(() => {
-    const clientHeight = artistRef.current.clientHeight;
-    const scrollHeight = artistRef.current.scrollHeight;
-
-    if (clientHeight < scrollHeight) {
-      setScrollable(true);
-    } else {
-      setScrollable(false);
-    }
-  }, [artistRef]);
+  let scrollable = false;
   
-  // Update client & scroll dimensions when artist list updates
+  // Detects if the browser supports hovering scroll by default or otherwise detects scrollbar width to compensate
   useEffect(() => {
-    getListSize();
-  }, [artists, getListSize]);
-
+    let scrollbox = new TempScrollBox();
+    setScrollWidth(scrollbox.width);
+    if (scrollbox.width === 0) {
+       setOverlayOn(true);
+    }
+    console.log(scrollbox.width);
+  }, [])
+  
   // Update client & scroll dimensions when the window resizes
   useEffect(() => {
-    window.addEventListener("resize", getListSize);
-    return window.removeEventListener("resize", getListSize);
-  }, [getListSize]);
-
+    if (!overlayOn) {
+      const getListSize = () => {
+        if (artistRef.current.clientHeight && artistRef.current.scrollHeight) {
+          const {clientHeight, scrollHeight} = artistRef.current;
+          setClientHeight(clientHeight);
+          setScrollHeight(scrollHeight);
+        }
+      };
+      
+      window.addEventListener("resize", getListSize);
+      getListSize();
+      return () => window.removeEventListener("resize", getListSize);
+    }
+  }, [overlayOn, artistRef]);
+  
+  // Makes scrollbar appear on mouse enter when content is scrollable
   const handleMouseEnter = (event) => {
     scrollable && setHovering(true);
   }
@@ -41,14 +46,33 @@ export function ArtistMap({artists, highlighted, highlightArtist}) {
     scrollable && setHovering(false);
   }
 
-  if (artists.length) {
-    clearButton = (
-      <div id="clearButton" ref={buttonRef}>
-        <button className='btn'>Clear all artists</button>
-      </div>
-    )
-  } else {
-    clearButton = '';
+  if (!overlayOn) {
+    if (clientHeightx < scrollHeightx) {
+      scrollable = true;
+    } else {
+      scrollable = false;
+    }
+  }
+
+  const mapStyles = {
+    width: `calc(85% + ${overlayOn ? 30 : scrollWidth}px)`,
+    marginRight: `calc(7.5% - ${overlayOn ? 15 : scrollWidth}px)`,
+    marginLeft: `calc(7.5% - ${overlayOn ? 15 : 0}px)`
+  };
+
+  const overlayStyles = {
+    maskImage: `linear-gradient(to top, transparent, black), linear-gradient(to left, transparent ${scrollWidth}px, black ${scrollWidth}px)`,
+    WebkitMaskImage: `linear-gradient(to top, transparent, black), linear-gradient(to left, transparent ${scrollWidth}px, black ${scrollWidth}px)`,
+    maskSize: '100% 10000%',
+    WebkitMaskSize: '100% 10000%',
+    maskPosition: hovering ? 'left top' : 'left bottom',
+    WebkitMaskPosition: hovering ? 'left top' : 'left bottom',
+    transition: 'mask-position 0.3s, -webkit-mask-position 0.3s'
+  };
+  
+  const tileStyles = {
+    marginRight: `${overlayOn ? 18 : 3}px`,
+    marginLeft: `${overlayOn ? 18 : 3}px`,
   }
 
   return (
@@ -57,17 +81,7 @@ export function ArtistMap({artists, highlighted, highlightArtist}) {
       ref={artistRef}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      style={{
-        width: `calc(85% + ${scrollWidth}px)`,
-        marginRight: `calc(7.5% - ${scrollWidth}px)`,
-        maskImage: `linear-gradient(to top, transparent, black), linear-gradient(to left, transparent ${scrollWidth}px, black ${scrollWidth}px)`,
-        WebkitMaskImage: `linear-gradient(to top, transparent, black), linear-gradient(to left, transparent ${scrollWidth}px, black ${scrollWidth}px)`,
-        maskSize: '100% 10000%',
-        WebkitMaskSize: '100% 10000%',
-        maskPosition: hovering ? 'left top' : 'left bottom',
-        WebkitMaskPosition: hovering ? 'left top' : 'left bottom',
-        transition: 'mask-position 0.3s, -webkit-mask-position 0.3s'
-      }}
+      style={ overlayOn ? mapStyles : {...mapStyles, ...overlayStyles} }
     >
       {artists.map(artist =>
         (<ArtistTile
@@ -76,9 +90,9 @@ export function ArtistMap({artists, highlighted, highlightArtist}) {
           length={artists.length}
           highlightArtist={highlightArtist}
           highlighted={highlighted}
+          tileStyles = {tileStyles}
         />)
       )}
-      {clearButton}
     </div>
   )
 }

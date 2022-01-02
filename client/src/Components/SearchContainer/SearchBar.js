@@ -7,7 +7,7 @@ import { useDebounce } from '../../Util'
 // https://sanusart.github.io/react-dropdown-select/prop/no-data-renderer
 // Change color of every artist past 2... although might not be a prob if i can compare more than two!
 
-export function SearchBar({ onChange, runCompare, artistHistory }) {
+export function SearchBar({ onChange, runCompare, artistHistory, clearArtists, deleteArtists }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [historyFormatted, setHistoryFormatted] = useState([]);
@@ -75,6 +75,7 @@ export function SearchBar({ onChange, runCompare, artistHistory }) {
           disabled={runCompare}
           placeholder="Search for artists here..."
           closeOnSelect='true'
+          clearable='true'
         />
       </div>   
     </div>

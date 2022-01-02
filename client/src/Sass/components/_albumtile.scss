@@ -31,11 +31,10 @@
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    // margin: 20px 0 40px 0;
     padding-top: 25px;
 
-    // 
-    // background: rgba(255, 255, 255, 0.75)
+
+    font-size: .8em;
   }
 
   &:hover {
@@ -54,30 +53,21 @@
   border-radius: 4px;
   padding: 8px 12px;
   width: 50vw;
-  min-width: 150px;
-  max-width: 200px;
+  min-width: 125px;
+  max-width: 175px;
   text-align: left;
 
-  .infoButton {
-    position: relative;
+  .link-btn {
     margin: 0 auto;
-    text-align: center;
 
-    button {
-      background-color: $blue;
-      width: 100px;
-      color: white;
-      font-weight: bold;
-      border: none;
-      padding: 5px;
-      border-radius: 2.5px;
-      cursor: pointer;
+    p {
+      margin-block: 0;
     }
   }
 
+
   @media screen and (max-width: $tablet) {
-    max-width: 175px;
-    font-size: .8em;
+    max-width: 150px;
   }
 }
 

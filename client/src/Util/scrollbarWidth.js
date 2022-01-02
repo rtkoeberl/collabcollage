@@ -1,6 +1,6 @@
 export default class TempScrollBox {
   constructor() {
-    this.scrollBarWidth = 0;
+    this.scrollBarWidth = null;
 
     this.measureScrollbarWidth();
   }
@@ -11,6 +11,7 @@ export default class TempScrollBox {
 
     // Make box scrollable
     scrollbox.style.overflow = 'scroll';
+    scrollbox.style.width = '100%';
 
     // Append box to document
     document.body.appendChild(scrollbox);

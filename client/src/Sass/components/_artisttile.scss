@@ -2,8 +2,8 @@
 #artistTiles {
   bottom: 0;
   margin: 0 auto;
-  margin-bottom: 5px;
-  // height: auto;
+  margin-bottom: 25px;
+  height: auto;
   flex: 1;
   position: relative;
   overflow-y: scroll;
@@ -14,7 +14,6 @@
   align-items: center;
   gap: 15px;
   margin: 3px;
-  margin-bottom: 10px;
 
   padding: 10px;
   white-space: pre-wrap;
@@ -22,6 +21,10 @@
   background-color: $color-primary;
   outline: none;
   transition: outline 500ms;
+
+  + .artistTile {
+    margin-top: 10px;
+  }
 
   .artistImgBox {
     flex: 1;
@@ -45,24 +48,6 @@
       padding-bottom: .5em;
     }
 
-    &--button {
-      text-align: center;
-      position: relative;
-      width: 100px;
-      background-color: $blue;
-      font-weight: bold;
-      border: none;
-      border-radius: 2.5px;
-      // cursor: pointer;
-
-      a {
-        display: inline-block;
-        padding: 5px;
-        text-decoration: none;
-        color: white;
-
-      }
-    }
   }
 
   .highlightBtn {
@@ -78,7 +63,7 @@
       display: inline-block;
       transition: display 500ms;
       position: absolute;
-      right: calc(7.5% + 33px);
+      right: calc(7.5% + 18px);
       width: auto;
       border: 1px solid black;
       background: white;

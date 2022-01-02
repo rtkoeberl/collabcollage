@@ -69,6 +69,24 @@ header {
   
 }
 
+.link-btn {
+  text-align: center;
+  position: relative;
+  width: 100px;
+  background-color: $blue;
+  font-weight: bold;
+  border: none;
+  border-radius: 2.5px;
+
+  a, p {
+    display: inline-block;
+    padding: 5px;
+    text-decoration: none;
+    color: white;
+    cursor: pointer;
+  }
+}
+
 // loading dots
 .loading-dots {
   text-align: center;

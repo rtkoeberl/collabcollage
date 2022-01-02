@@ -1,7 +1,7 @@
 import React from 'react';
 import { LoadingDots } from '../LoadingDots';
 
-export function ArtistTile({ artist, length, highlightArtist, highlighted }) {
+export function ArtistTile({ artist, length, highlightArtist, highlighted, tileStyles }) {
   let excerpt = '';
   let complete = artist.page === artist.pages && artist.page !== 0 ? " complete" : '';
   let highlight = highlighted.id === artist.id ? " highlight" : '';
@@ -43,7 +43,10 @@ export function ArtistTile({ artist, length, highlightArtist, highlighted }) {
   }
   
   return(
-    <div className={"artistTile" + complete + highlight}>
+    <div
+      className={"artistTile" + complete + highlight}
+      style={tileStyles}
+    >
       <div className="artistImgBox">
         <a href={artist.uri} target="_blank" rel="noreferrer">
           {artist.image ? <img className="artistImg" src={artist.image} alt={artist.name}></img> : <LoadingDots color="black" />}
@@ -56,7 +59,7 @@ export function ArtistTile({ artist, length, highlightArtist, highlighted }) {
             <div className='excerpt--text'>
               <p>{excerpt}</p>
             </div>
-            <div className="excerpt--button">
+            <div className="link-btn">
               <a href={artist.uri} target="_blank" rel="noreferrer">Read More</a>
             </div>
           </div>
