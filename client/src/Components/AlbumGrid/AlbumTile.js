@@ -33,12 +33,25 @@ export function AlbumTile ({ album }) {
     return `${mainStr}${mainStr && (credits.length) ? '. It ' : ''}${commaSeparate(credits)}`;
   }
 
+  // const openInNewTab = (url) => {
+  //   const newWindow = window.open('', '_blank', 'noopener, noreferrer');
+  //   newWindow.location.assign(url);
+  //   if (newWindow) {
+  //     newWindow.opener = null
+  //   }
+  // }
+
   const getReleaseLink = async () => {
-    const newWindow = window.open('', '_blank', 'noopener,noreferrer');
+    const releaseId = album.id_r;
+    let newWindow = window.open('', '_blank');
 
-    const { data: releaseInfo } = await axios.get(`/api/discog/release/${album.id_r}`);
+    const { data: releaseInfo } = await axios.get(`/api/discog/release/${releaseId}`);
 
-    newWindow.location.href(releaseInfo.uri);
+    newWindow.location.href =releaseInfo.uri;
+    
+    if (newWindow) {
+      newWindow.opener = null
+    }
   }
 
   return (
