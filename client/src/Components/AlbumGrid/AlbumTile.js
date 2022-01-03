@@ -33,14 +33,6 @@ export function AlbumTile ({ album }) {
     return `${mainStr}${mainStr && (credits.length) ? '. It ' : ''}${commaSeparate(credits)}`;
   }
 
-  // const openInNewTab = (url) => {
-  //   const newWindow = window.open('', '_blank', 'noopener, noreferrer');
-  //   newWindow.location.assign(url);
-  //   if (newWindow) {
-  //     newWindow.opener = null
-  //   }
-  // }
-
   const getReleaseLink = async () => {
     const releaseId = album.id_r;
     let newWindow = window.open('', '_blank');
