@@ -33,18 +33,12 @@ export function AlbumTile ({ album }) {
     return `${mainStr}${mainStr && (credits.length) ? '. It ' : ''}${commaSeparate(credits)}`;
   }
 
-  const openInNewTab = (url) => {
-    const newWindow = window.open(url, '_blank', 'noopener,noreferrer')
-    if (newWindow) {
-      newWindow.opener = null
-    }
-  }
-
   const getReleaseLink = async () => {
-    const releaseId = album.id_r;
-    let { data: releaseInfo } = await axios.get(`/api/discog/release/${releaseId}`)
-    openInNewTab(releaseInfo.uri);
-    console.log(releaseInfo);
+    const newWindow = window.open('', '_blank', 'noopener,noreferrer');
+
+    const { data: releaseInfo } = await axios.get(`/api/discog/release/${album.id_r}`);
+
+    newWindow.location.href(releaseInfo.uri);
   }
 
   return (
