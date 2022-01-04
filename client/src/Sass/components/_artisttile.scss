@@ -63,7 +63,7 @@
       display: inline-block;
       transition: display 500ms;
       position: absolute;
-      right: calc(7.5% + 25px);
+      right: calc(7.5% + 18px);
       width: auto;
       border: 1px solid black;
       background: white;
@@ -73,10 +73,6 @@
     }
   }
 }
-
-// .complete {
-//   border: 1px dotted $color-secondary;
-// }
 
 .highlight {
   outline: 3px dashed $blue;

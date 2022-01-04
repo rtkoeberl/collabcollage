@@ -16,6 +16,7 @@ class App extends React.Component {
     this.saveArtist = this.saveArtist.bind(this);
     this.getArtistInfo = this.getArtistInfo.bind(this);
     this.getCredits = this.getCredits.bind(this);
+    this.updateBackup = this.updateBackup.bind(this);
     this.backupData = this.backupData.bind(this);
     this.storeHistory = this.storeHistory.bind(this);
     this.toggleCompare = this.toggleCompare.bind(this);
@@ -94,8 +95,7 @@ class App extends React.Component {
       items: discog.pagination.items,
       releases: formatRelease(discog.releases, 1)
     }
-
-    console.log(artistInfo);
+    // console.log(artistInfo);
 
     // check mongo backup for this artist's discog
     if (discog.pagination.pages >= 45) {
@@ -109,16 +109,14 @@ class App extends React.Component {
           artistInfo.backupStatus = 'update';
         } else {
           console.log(`Backup for ${artist.name} retrieved`)
-          artistInfo.page = discog.pagination.pages;
-          artistInfo.releases = backup[0].releases;
         }
+        artistInfo.page = discog.pagination.pages;
+        artistInfo.releases = backup[0].releases;
       } else {
         console.log(`Backup for ${artist.name} to upload`)
         artistInfo.backupStatus = 'upload';
       }
     }
-
-    // LATER: add regex logic to trim profile blurb
 
     let artists = [...this.state.artists];
     let index = artists.map(a => a.id).indexOf(id);
@@ -133,7 +131,7 @@ class App extends React.Component {
     }
   }
   
-  // Call for another page of an artist's credits
+  // Call for another page of a given artist's credits
   async getCredits(id, page, i) {
     let { data: newPage } = await axios.get(`/api/discog/${id}/releases/${page}`)
     let newReleases = formatRelease(newPage.releases, page);
@@ -150,26 +148,8 @@ class App extends React.Component {
     }
   }
 
-  backupData(artist) {
-    const body = {
-      name: artist.name,
-      id: artist.id,
-      releases: artist.releases,
-      items: artist.items
-    }
-
-    if (artist.backupStatus === 'upload') {
-      axios.post(`/api/backup`, body);
-      console.log(`${artist.name} backup uploaded`)
-    } else if (artist.backupStatus === 'update') {
-      axios.post(`/api/backup/${artist.id}`, body)
-      console.log(`${artist.name} backup updated`)
-    }
-
-    artist.backupStatus = null;
-  }
-
   storeHistory() {
+
     // Deep copy the current artist history
     const artistHistory = deepCopy(this.state.artistHistory);
     this.state.artists.forEach(artist => {
@@ -186,8 +166,6 @@ class App extends React.Component {
       }
     })
 
-    console.log(artistHistory);
-
     // Save last fifteen aftists to state AND local storage
     const newArtistHistory = artistHistory.slice(0, 15);
 
@@ -197,22 +175,59 @@ class App extends React.Component {
 
     ls.remove('artistHistory');
     ls.set('artistHistory', JSON.stringify(newArtistHistory));
-    console.log(JSON.parse(ls.get('artistHistory')));
-  }
 
-  // Highlight artist
-  highlightArtist(artist, current) {
-    if (artist.id === current.id) {
-      this.setState({highlighted: {
-        name: null,
-        id: null
-      }})
-    } else {
-      this.setState({highlighted: {
-        name: artist.name,
-        id: artist.id
-      }})
+  }
+  
+  // After comparison is run, retrieve new copy of artist discography to be updated, which is interrupted if a new search is run.
+  async updateBackup(artist) {
+
+    const pages = artist.pages;
+    const backupInfo = {
+      name: artist.name,
+      id: artist.id,
+      releases: [],
+      items: artist.items,
+
     }
+    let i = 1;
+
+    while (i <= pages && this.state.runCompare === false) {
+      let { data: newPage } = await axios.get(`/api/discog/${artist.id}/releases/${i}`);
+      let newReleases = formatRelease(newPage.releases, i);
+      backupInfo.releases.push(newReleases);
+      console.log(`Backup page ${i} retrieved`)
+      i++;
+    }
+
+    if ( i === (pages + 1) ) {
+      axios.post(`/api/backup/${artist.id}`, backupInfo);
+      console.log(`${artist.name} backup updated`)
+    } else {
+      console.log(`${artist.name} backup update failed`)
+    }
+  }
+  
+  // Handle artists whose discographies must be updated or uploaded
+  backupData(artist) {
+    
+    if (artist.backupStatus === 'upload') {
+
+      const body = {
+        name: artist.name,
+        id: artist.id,
+        releases: artist.releases,
+        items: artist.items
+      }
+      axios.post(`/api/backup`, body);
+      console.log(`${artist.name} backup uploaded`)
+
+    } else if (artist.backupStatus === 'update') {
+
+      this.updateBackup(artist);
+
+    }
+
+    artist.backupStatus = null;
   }
 
   // Handle starting/stopping comparison requests, update local storage and mongo backups
@@ -231,14 +246,31 @@ class App extends React.Component {
 
        // If artists' discographies are fully loaded, update mongo backups and local storage
       if (this.state.artists.every(artist => artist.page === artist.pages)) {
-        console.log("Storing history!")
+
+        // Store history locally
         this.storeHistory();
 
+        // Upload or update Mongo server copies of Discogs
         this.state.artists.forEach(artist => {
           this.backupData(artist);
         })
       }
       
+    }
+  }
+
+  // Highlight artist
+  highlightArtist(artist, current) {
+    if (artist.id === current.id) {
+      this.setState({highlighted: {
+        name: null,
+        id: null
+      }})
+    } else {
+      this.setState({highlighted: {
+        name: artist.name,
+        id: artist.id
+      }})
     }
   }
 

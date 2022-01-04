@@ -3,10 +3,6 @@ import axios from 'axios';
 import Select from 'react-dropdown-select';
 import { useDebounce } from '../../Util'
 
-// TO DO
-// https://sanusart.github.io/react-dropdown-select/prop/no-data-renderer
-// Change color of every artist past 2... although might not be a prob if i can compare more than two!
-
 export function SearchBar({ onChange, runCompare, artistHistory, clearArtists, deleteArtists }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -34,10 +30,8 @@ export function SearchBar({ onChange, runCompare, artistHistory, clearArtists, d
   useEffect(
     () => {
       if (debouncedSearchTerm) {
-        // setIsSearching(true);
         onSearch(debouncedSearchTerm).then(res => {
-          console.log(res);
-          // setIsSearching(false);
+          // console.log(res);
           setSearchResults(res.results.map(result => ({
             label: result.title,
             value: result.id

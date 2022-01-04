@@ -123,7 +123,7 @@ export function AlbumGrid({ state, onGetCredits, onReset }) {
         const load = updateLoadProgress(artists);
         setLoadPercent(load.totalLoaded);
         findCollabs();
-        // console.log(load.nextIndex)
+
         if (load.nextIndex !== null) {
           let { id: artistId, page } = artists[load.nextIndex];
           onGetCredits( artistId, page + 1, load.nextIndex );

@@ -18,7 +18,7 @@ export function ArtistMap({artists, highlighted, highlightArtist}) {
     if (scrollbox.width === 0) {
        setOverlayOn(true);
     }
-    console.log(scrollbox.width);
+    // console.log(scrollbox.width);
   }, [])
   
   // Update client & scroll dimensions when the window resizes
