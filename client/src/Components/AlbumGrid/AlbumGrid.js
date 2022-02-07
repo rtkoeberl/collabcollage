@@ -3,7 +3,7 @@ import { updateLoadProgress, deepCopy, commaSeparate } from '../../Util';
 import { AlbumTile } from './AlbumTile';
 import { LoadingDots } from '../LoadingDots';
 
-export function AlbumGrid({ state, onGetCredits, onReset }) {
+export function AlbumGrid({ state, onGetCredits, onReset, pauseBackup }) {
   const [loadPercent, setLoadPercent] = useState([]);
   const [currentArtists, setCurrentArtists] = useState([]);
   const [collabs, setCollabs] = useState([]);
@@ -16,9 +16,9 @@ export function AlbumGrid({ state, onGetCredits, onReset }) {
     hideVarious,
     highlighted
   } = state;
-  let
-    loading,
-    headline;
+  let loading;
+  let headline = "Search results will appear here";
+  let headlineActive = false;
 
 
   useEffect(
@@ -67,7 +67,6 @@ export function AlbumGrid({ state, onGetCredits, onReset }) {
                     let exists = collabArr.filter(c => r1.id_m ? r1.id_m === c.id_m : r1.id_r === c.id_r);
                     if (exists.length) {
                       // And if so, add the missing artist to the list of collaborators
-                      // console.log('Oh, this already exists!')
                       let ci = collabArr.indexOf(exists[0]);
                       if (collabArr[ci].collaborators.map(r => r._id).indexOf(j) === -1) {
                         collabArr[ci].collaborators.push({
@@ -85,7 +84,7 @@ export function AlbumGrid({ state, onGetCredits, onReset }) {
                         resource_url: r1.resource_url,
                         thumb: r1.thumb,
                         title: r1.title,
-                        year: r1.year,
+                        year: Math.min(r1.year, r2.year),
                         format: r1.format,
                         collaborators: [
                           {
@@ -193,21 +192,21 @@ export function AlbumGrid({ state, onGetCredits, onReset }) {
       loading = (
         <div className="loadResultBox">
           { runCompare ? <LoadingDots color="white" /> : null }
-          <p>Load Percent: {loadPercent[0]} / {loadPercent[1]}</p>
-          <p>Results: {collabs.filter(filterCollabs).length}</p>
+          <p>Load Progress: {loadPercent[0]} / {loadPercent[1]}</p>
+          <p>Possible Collabs: {collabs.filter(filterCollabs).length}</p>
         </div>
       )
     } else {
       if (collabs.filter(filterCollabs).length === 0) {
         loading = (
           <div className="loadResultBox">
-            <p><strong>No results found!</strong></p>
+            <p><strong>No collaborations found!</strong></p>
           </div>
         )
       } else {
         loading = (
           <div className="loadResultBox">
-            <p>Results: {collabs.filter(filterCollabs).length}</p>
+            <p>Possible Collabs: {collabs.filter(filterCollabs).length}</p>
           </div>
         )
       }
@@ -219,21 +218,22 @@ export function AlbumGrid({ state, onGetCredits, onReset }) {
   
   // Set Banner Message
   if (currentArtists.length) {
+    headlineActive = true;
     if (highlighted.name === null) {
-      headline = `Collaborations between ${commaSeparate(currentArtists)}`;
+      headline = `Results for ${commaSeparate(currentArtists)}`;
     } else {
-      headline = `Collaborations between ${highlighted.name} and either ${commaSeparate(currentArtists.filter(e => e !== highlighted.name), 'or')}`
+      headline = `Results for ${highlighted.name} and either ${commaSeparate(currentArtists.filter(e => e !== highlighted.name), 'or')}`
     }
     
   }
 
   return (
     <div className={`albumArea ${hideSidebar ? 'hideSidebar--grid' : ''}`}>
-      <div id="collageHeader"><h3>{headline}</h3></div>
+      <div id="collageHeader"><h3 className={!headlineActive ? 'headlineInactive' : ''}>{headline}</h3></div>
       {loading}
       <div id="albumGrid">
         {collabs.filter(filterCollabs).sort(sortByYear).map((album, id) => {
-          return <AlbumTile key={id} album={album} />
+          return <AlbumTile key={id} album={album} pauseBackup={pauseBackup} />
         })}
       </div>
     </div>

@@ -3,7 +3,7 @@ import axios from 'axios';
 import Select from 'react-dropdown-select';
 import { useDebounce } from '../../Util'
 
-export function SearchBar({ onChange, runCompare, artistHistory, clearArtists, deleteArtists }) {
+export function SearchBar({ onChange, runCompare, artistHistory, pauseBackup }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [historyFormatted, setHistoryFormatted] = useState([]);
@@ -20,6 +20,7 @@ export function SearchBar({ onChange, runCompare, artistHistory, clearArtists, d
 
   // Search for artist
   const handleSearch = (value) => {
+    pauseBackup();
     if (value) {
       setSearchTerm(value.state.search)
     }
@@ -44,7 +45,8 @@ export function SearchBar({ onChange, runCompare, artistHistory, clearArtists, d
     [debouncedSearchTerm]
   )
 
-  const onSearch = (artist) => {
+  const onSearch = async (artist) => {
+    // pauseBackup();
     return axios.get(`/api/discog/search/${encodeURIComponent(artist)}`)
       .then(res => res.data)
       .catch((error) => console.log(error))

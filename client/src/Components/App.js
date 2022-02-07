@@ -12,37 +12,123 @@ import placeholder from '../Images/placeholder.jpeg';
 class App extends React.Component {
   constructor(props) {
     super(props);
-  
+    
+    this.pauseBackup = this.pauseBackup.bind(this);
     this.saveArtist = this.saveArtist.bind(this);
     this.getArtistInfo = this.getArtistInfo.bind(this);
     this.getCredits = this.getCredits.bind(this);
-    this.updateBackup = this.updateBackup.bind(this);
-    this.backupData = this.backupData.bind(this);
     this.storeHistory = this.storeHistory.bind(this);
     this.toggleCompare = this.toggleCompare.bind(this);
     this.toggleOption = this.toggleOption.bind(this);
     this.toggleSidebar = this.toggleSidebar.bind(this);
     this.togglePopUp = this.togglePopUp.bind(this);
     this.highlightArtist = this.highlightArtist.bind(this);
+
     
     this.state = {
       artists: [],
       artistHistory: JSON.parse(ls.get('artistHistory')) || [],
+      artistsToBackup: [],
       runCompare: false,
       hideComps: true,
       hideUnofficial: true,
       hideVarious: true,
       hideSidebar: false,
       showPopUp: ls.get('returnVisit') ? false : true,
+      isIdle: true,
       highlighted: {
         name: null,
         id: null
       }
     }
+    
+    this.controller = null;
+    this.idleTimeout = null;
+  }
+
+  // RUN BACKGROUND UPDATE - Check for artists that need Mongo backups updated and call API to update them while user is idle
+  async componentDidUpdate(prevProps, prevState) {
+
+    if (
+      this.state.artistsToBackup !== prevState.artistsToBackup ||
+      this.state.runCompare !== prevState.runCompare ||
+      this.state.isIdle !== prevState.isIdle
+    ) {
+
+      // if comparison is not running
+      if (this.state.runCompare === false && this.state.isIdle === true) { 
+        if (this.state.artistsToBackup.length) {
+          // console.log('User idle, artist backup to occur')
+          let artistCopy = deepCopy(this.state.artistsToBackup[0]);
+
+          if (artistCopy.page < artistCopy.pages) {
+
+            try {
+              const { data: newPage } = await axios.get(`/api/discog/${artistCopy.id}/releases/${artistCopy.page + 1}`);
+              artistCopy.releases = artistCopy.releases.concat(formatRelease(newPage.releases, artistCopy.page));
+              artistCopy.page++;
+              let artistsToBackup = [...this.state.artistsToBackup];
+              artistsToBackup[0] = artistCopy
+
+              this.setState(prevState => {
+                if (artistCopy.page === (prevState.artistsToBackup[0].page + 1)) {
+                  return {
+                    artistsToBackup: artistsToBackup
+                  }
+                }
+              })
+              // console.log(`page ${artistCopy.page} of ${artistCopy.pages} added to ${artistCopy.name}'s profile`)
+            } catch (err) {
+              if (err.name === 'AbortError') {
+                console.log('Fetch aborted');
+              } else {
+                console.log('Uh oh, an error!', err);
+              }
+            }
+
+          } else if (artistCopy.page === artistCopy.pages) {
+            const backupInfo = {
+              name: artistCopy.name,
+              id: artistCopy.id,
+              releases: artistCopy.releases,
+              items: artistCopy.items,
+            }
+
+            axios.post(`/api/backup/${backupInfo.id}`, backupInfo);
+            console.log(`${artistCopy.name} backup updated`);
+            this.setState(prevState => {
+              return {
+                artistsToBackup: prevState.artistsToBackup.slice(1)
+              }
+            })
+          }
+        } 
+      }
+    }
+  }
+
+  // PAUSE BACKGROUND UPDATE - Set a timeout on background API calls to prioritize active user-initiated API calls
+  pauseBackup() {
+    clearTimeout(this.idleTimeout);
+    if (!this.state.runCompare) {
+      this.setState(prevState => {
+        if (this.state.artistsToBackup.length && prevState.isIdle === true) {
+          console.log('Artist backup paused')
+        }
+        return {
+          isIdle: false
+        }
+      });
+  
+      this.idleTimeout = setTimeout(() => {
+        this.setState({isIdle: true});
+      }, (1000 * 10));
+    }
   }
   
-  // Update artists state with name/id from SearchBar, and call API to fill in additional info if needed
-  saveArtist(valArr)  {
+  // UPDATE ARTIST LIST - Update artists state with name/id from SearchBar, and call API to fill in additional info if needed
+  saveArtist(valArr) {
+
     if (this.state.highlighted.id && valArr.map(a => a.value).indexOf(this.state.highlighted.id) === -1) {
       console.log('The highlighted artist has been deleted!')
       this.setState({
@@ -78,7 +164,7 @@ class App extends React.Component {
     });
   }
 
-  // Call for artist info and first page of discography
+  // GET ARTIST INFO - Call for artist info and first page of discography
   async getArtistInfo(id)  {
     let artistCall = axios.get(`/api/discog/${id}`);
     let discogCall = axios.get(`/api/discog/${id}/releases`);
@@ -101,12 +187,23 @@ class App extends React.Component {
     if (discog.pagination.pages >= 45) {
       let {data: backup} = await axios.get(`/api/backup/${id}`)
       if (typeof backup[0] === 'object') {
+        let today = new Date();
+        let backupDate = new Date(backup[0].date);
+        backupDate.setDate(backupDate.getDate() + 14);
+
         if (
-          ( backup[0].items + 15 ) < discog.pagination.items &&
-          new Date(backup[0].date).toLocaleDateString !== Date.now().toLocaleDateString
+          ( backup[0].items + 25 ) < discog.pagination.items &&
+          backupDate <= today
         ) {
           console.log(`Backup for ${artist.name} to update`)
-          artistInfo.backupStatus = 'update';
+          const exists = this.state.artistsToBackup.map(a => a.id).indexOf(artist.id);
+          if (exists === -1) {
+            this.setState(prevState => {
+              return {
+                artistsToBackup: prevState.artistsToBackup.concat([deepCopy(artistInfo)])
+              }
+            })
+          }
         } else {
           console.log(`Backup for ${artist.name} retrieved`)
         }
@@ -131,14 +228,14 @@ class App extends React.Component {
     }
   }
   
-  // Call for another page of a given artist's credits
+  // GET PAGE OF RELEASES - Call for another page of a given artist's credits
   async getCredits(id, page, i) {
     let { data: newPage } = await axios.get(`/api/discog/${id}/releases/${page}`)
     let newReleases = formatRelease(newPage.releases, page);
     
-    let artists = [...this.state.artists];
+    let artists = deepCopy(this.state.artists);
     let index = artists.map(a => a.id).indexOf(id);
-    if (index > -1) {
+    if ( index > -1 && index === i ) {
       artists[i].releases = artists[i].releases.concat(newReleases);
       artists[i].page = newPage.pagination.page;
 
@@ -147,10 +244,9 @@ class App extends React.Component {
       });
     }
   }
-
+  
+  // STORE HISTORY LOCALLY - Preserve discographies of recently searched artists to local storage
   storeHistory() {
-
-    // Deep copy the current artist history
     const artistHistory = deepCopy(this.state.artistHistory);
     this.state.artists.forEach(artist => {
       const exists = artistHistory.map(a => a.id).indexOf(artist.id);
@@ -177,65 +273,12 @@ class App extends React.Component {
     ls.set('artistHistory', JSON.stringify(newArtistHistory));
 
   }
-  
-  // After comparison is run, retrieve new copy of artist discography to be updated, which is interrupted if a new search is run.
-  async updateBackup(artist) {
 
-    const pages = artist.pages;
-    const backupInfo = {
-      name: artist.name,
-      id: artist.id,
-      releases: [],
-      items: artist.items,
-
-    }
-    let i = 1;
-
-    while (i <= pages && this.state.runCompare === false) {
-      let { data: newPage } = await axios.get(`/api/discog/${artist.id}/releases/${i}`);
-      let newReleases = formatRelease(newPage.releases, i);
-      backupInfo.releases.push(newReleases);
-      console.log(`Backup page ${i} retrieved`)
-      i++;
-    }
-
-    if ( i === (pages + 1) ) {
-      axios.post(`/api/backup/${artist.id}`, backupInfo);
-      console.log(`${artist.name} backup updated`)
-    } else {
-      console.log(`${artist.name} backup update failed`)
-    }
-  }
-  
-  // Handle artists whose discographies must be updated or uploaded
-  backupData(artist) {
-    
-    if (artist.backupStatus === 'upload') {
-
-      const body = {
-        name: artist.name,
-        id: artist.id,
-        releases: artist.releases,
-        items: artist.items
-      }
-      axios.post(`/api/backup`, body);
-      console.log(`${artist.name} backup uploaded`)
-
-    } else if (artist.backupStatus === 'update') {
-
-      this.updateBackup(artist);
-
-    }
-
-    artist.backupStatus = null;
-  }
-
-  // Handle starting/stopping comparison requests, update local storage and mongo backups
+  // RUN COMPARISON - Handle starting/stopping comparison requests, updating local storage and mongo backups
   toggleCompare(boolean) {
     if (boolean === true) {
       if (this.state.runCompare === false) {
         this.setState({runCompare: true});
-        // Minimize SearchBox
         console.log("We're running")
       } else {
         console.log('Comparison already in progress')
@@ -247,19 +290,29 @@ class App extends React.Component {
        // If artists' discographies are fully loaded, update mongo backups and local storage
       if (this.state.artists.every(artist => artist.page === artist.pages)) {
 
-        // Store history locally
-        this.storeHistory();
-
         // Upload or update Mongo server copies of Discogs
         this.state.artists.forEach(artist => {
-          this.backupData(artist);
+          if (artist.backupStatus === 'upload') {
+            const body = {
+              name: artist.name,
+              id: artist.id,
+              releases: artist.releases,
+              items: artist.items
+            }
+            axios.post(`/api/backup`, body);
+            console.log(`${artist.name} backup uploaded`)
+            artist.backupStatus = null;
+          }
         })
+
+        // Store history locally
+        this.storeHistory();
       }
       
     }
   }
 
-  // Highlight artist
+  // HIGHLIGHT - Highlight a single artist within your search
   highlightArtist(artist, current) {
     if (artist.id === current.id) {
       this.setState({highlighted: {
@@ -273,7 +326,8 @@ class App extends React.Component {
       }})
     }
   }
-
+  
+  // OPTIONS - Toggle on and off search parameters related to release description
   toggleOption(option, boolean) {
     if (option === "comps") {
       if (boolean === true && this.state.hideComps === false) {
@@ -299,7 +353,8 @@ class App extends React.Component {
       }
     }
   }
-
+  
+  // SIDEBAR - Toggle visibility of sidebar
   toggleSidebar(boolean) {
     if (boolean === true) {
       this.setState({hideSidebar: true});
@@ -307,7 +362,8 @@ class App extends React.Component {
       this.setState({hideSidebar: false});
     }
   }
-
+  
+  // POP-UP - Toggle visibility of pop-up
   togglePopUp(boolean) {
     if (boolean === true) {
       this.setState({showPopUp: true});
@@ -315,6 +371,9 @@ class App extends React.Component {
       this.setState({showPopUp: false});
     }
   }
+
+
+  // 
 
   render() {
     return (
@@ -330,11 +389,13 @@ class App extends React.Component {
           onHide={this.toggleOption}
           toggleSidebar={this.toggleSidebar}
           highlightArtist={this.highlightArtist}
+          pauseBackup={this.pauseBackup}
         />
         <AlbumGrid
           state={this.state}
           onGetCredits={this.getCredits} 
-          onReset={this.toggleCompare} 
+          onReset={this.toggleCompare}
+          pauseBackup={this.pauseBackup}
         />
         <PopUp
           showPopUp={this.state.showPopUp}

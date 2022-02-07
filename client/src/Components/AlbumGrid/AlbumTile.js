@@ -2,7 +2,7 @@ import axios from 'axios';
 import React from 'react';
 import { commaSeparate } from '../../Util';
 
-export function AlbumTile ({ album }) {
+export function AlbumTile ({ album, pauseBackup }) {
   let artistFormatted;
   if (album.artist.length > 100) {
     artistFormatted = album.artist.slice(0,100) + '...';
@@ -34,6 +34,7 @@ export function AlbumTile ({ album }) {
   }
 
   const getReleaseLink = async () => {
+    pauseBackup();
     const releaseId = album.id_r;
     let newWindow = window.open('', '_blank');
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-export function RunButton ({ artists, runCompare, onRun, toggleSidebar }) {
+export function RunButton ({ artists, runCompare, onRun, toggleSidebar, pauseBackup }) {
   const [canSearch, setCanSearch] = useState(false);
   const [buttonMessage, setButtonMessage] = useState('Add Artists to Begin');
   let artistLimit = 10;
@@ -30,6 +30,7 @@ export function RunButton ({ artists, runCompare, onRun, toggleSidebar }) {
   )
 
   const handleRun = () => {
+    pauseBackup();
     if (!runCompare) {
       onRun(true);
       if (window.innerWidth <= 500) {
@@ -42,6 +43,6 @@ export function RunButton ({ artists, runCompare, onRun, toggleSidebar }) {
 
   return (
     <div id="runButton">
-      <button className="btn" onClick={() => handleRun()} disabled={!canSearch}>{buttonMessage}</button>
+      <button className="btn" onMouseEnter={() => pauseBackup()} onClick={() => handleRun()} disabled={!canSearch}>{buttonMessage}</button>
     </div>)
 }

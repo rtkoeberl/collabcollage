@@ -34,7 +34,8 @@ const replaceBackup = async (name, id, releases, items) => {
         name,
         id,
         releases,
-        items: Number(items)
+        items: Number(items),
+        date: Date.now()
       }
     )
   } catch(e) {
