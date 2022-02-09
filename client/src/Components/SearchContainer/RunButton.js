@@ -14,7 +14,7 @@ export function RunButton ({ artists, runCompare, onRun, toggleSidebar, pauseBac
         } else if (artists.length > 1 && artists.length <= artistLimit) {
           if (artists.every(a => a.releases.length)) {
             setCanSearch(true);
-            setButtonMessage('Generate Discog')
+            setButtonMessage('Run Comparison')
           } else {
             setCanSearch(false);
             setButtonMessage('Loading Artist Data...')
