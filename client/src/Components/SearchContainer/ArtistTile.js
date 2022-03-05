@@ -40,6 +40,10 @@ export function ArtistTile({ artist, length, highlightArtist, highlighted, tileS
     );
   } else {
     highlightButton = '';
+    if (highlighted.id) {
+      highlightArtist('reset');
+    }
+    
   }
   
   return(

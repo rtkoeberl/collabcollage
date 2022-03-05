@@ -314,7 +314,12 @@ class App extends React.Component {
 
   // HIGHLIGHT - Highlight a single artist within your search
   highlightArtist(artist, current) {
-    if (artist.id === current.id) {
+    if (artist === 'reset') {
+      this.setState({highlighted: {
+        name: null,
+        id: null
+      }})
+    } else if (artist.id === current.id) {
       this.setState({highlighted: {
         name: null,
         id: null
