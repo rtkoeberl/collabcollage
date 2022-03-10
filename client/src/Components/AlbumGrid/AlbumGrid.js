@@ -14,7 +14,8 @@ export function AlbumGrid({ state, onGetCredits, onReset, pauseBackup }) {
     hideUnofficial,
     hideSidebar,
     hideVarious,
-    highlighted
+    highlighted,
+    searchAll
   } = state;
   let loading;
   let headline = "Search results will appear here";
@@ -175,6 +176,12 @@ export function AlbumGrid({ state, onGetCredits, onReset, pauseBackup }) {
       let featuresHighlighted = clb.collaborators.some(clbr => clbr.id === highlighted.id);
       if (!featuresHighlighted) {
         status = false;
+      }
+    }
+
+    if (searchAll) {
+      if (clb.collaborators.length !== artists.length) {
+        status = false
       }
     }
 

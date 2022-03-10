@@ -2,7 +2,7 @@ import React, { useState, useEffect, createRef } from 'react';
 import { ArtistTile } from './ArtistTile';
 import { TempScrollBox } from '../../Util';
 
-export function ArtistMap({artists, highlighted, highlightArtist}) {
+export function ArtistMap({artists, highlighted, highlightArtist, searchAll}) {
   const [hovering, setHovering] = useState(false);
   const [overlayScroll, setOverlayScroll] = useState(false);
   const [scrollable, setScrollable] = useState(false);
@@ -84,7 +84,8 @@ export function ArtistMap({artists, highlighted, highlightArtist}) {
           length={artists.length}
           highlightArtist={highlightArtist}
           highlighted={highlighted}
-          tileStyles = {tileStyles}
+          tileStyles={tileStyles}
+          searchAll={searchAll}
         />)
       )}
     </div>

@@ -34,6 +34,7 @@ class App extends React.Component {
       hideUnofficial: true,
       hideVarious: true,
       hideSidebar: false,
+      searchAll: false,
       showPopUp: ls.get('returnVisit') ? false : true,
       isIdle: true,
       highlighted: {
@@ -355,6 +356,14 @@ class App extends React.Component {
         this.setState({hideVarious: true});
       } else if ( boolean === false && this.state.hideVarious === true){
         this.setState({hideVarious: false});
+      }
+    }
+
+    if (option === "all") {
+      if (boolean === true && this.state.searchAll === false) {
+        this.setState({searchAll: true});
+      } else if ( boolean === false && this.state.searchAll === true){
+        this.setState({searchAll: false});
       }
     }
   }

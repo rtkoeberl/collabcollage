@@ -1,9 +1,19 @@
 import React from 'react';
 
-export function Toolbar ({ state: {hideComps, hideUnofficial, hideVarious}, onHide }) {
+export function Toolbar ({ state: {artists, hideComps, hideUnofficial, hideVarious, searchAll}, onHide }) {
   const handleHide = (option, boolean) => {
     onHide(option, !boolean)
   }
+
+  let length = artists.length;
+
+  const searchAllOption = (
+    <div>
+      <input type="checkbox" id="searchAll" name="searchAll"
+        defaultChecked={searchAll} onChange={() => handleHide("all", searchAll)} />
+      <label htmlFor="searchAll">Limit Results to Releases Containing All {length} Artists</label>
+    </div>
+  )
 
   return (
     <details id="toolbar">
@@ -23,6 +33,7 @@ export function Toolbar ({ state: {hideComps, hideUnofficial, hideVarious}, onHi
           defaultChecked={hideVarious} onChange={() => handleHide("various", hideVarious)} />
         <label htmlFor="hideVarious">Hide Releases by "Various" or "Unknown"</label>
       </div>
+      {length > 2 ? searchAllOption : ''}
     </details>
   )
 }

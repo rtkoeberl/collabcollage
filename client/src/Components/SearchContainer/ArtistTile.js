@@ -1,7 +1,7 @@
 import React from 'react';
 import { LoadingDots } from '../LoadingDots';
 
-export function ArtistTile({ artist, length, highlightArtist, highlighted, tileStyles }) {
+export function ArtistTile({ artist, length, highlightArtist, highlighted, tileStyles, searchAll }) {
   let excerpt = '';
   let complete = artist.page === artist.pages && artist.page !== 0 ? " complete" : '';
   let highlight = highlighted.id === artist.id ? " highlight" : '';
@@ -25,7 +25,7 @@ export function ArtistTile({ artist, length, highlightArtist, highlighted, tileS
     }
   }
 
-  if (length > 2) {
+  if (length > 2 && !searchAll) {
     highlightButton = (
       <div className="highlightBtn">
         <input

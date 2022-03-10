@@ -50,8 +50,12 @@
 
 #toolbar {
   text-align: left;
-  * {
+  summary {
     padding-bottom: 5px;
+  }
+  div {
+    font-size: .8em;
+    padding-bottom: 2.5px;
   }
 }
 
