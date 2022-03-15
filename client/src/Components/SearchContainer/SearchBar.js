@@ -17,22 +17,39 @@ export function SearchBar({ onChange, runCompare, artistHistory, pauseBackup }) 
     },
     [artistHistory]
   )
-
+  
   // Search for artist
-  const handleSearch = (value) => {
+  const handleSearch = ({ props, state, methods }) => {
+    
     pauseBackup();
-    if (value) {
-      setSearchTerm(value.state.search)
+
+    if (state.search) {
+      setSearchTerm(state.search);
     }
+    
+    // match trimmed input
+    const regexp = new RegExp(methods.safeString(state.search.trim()), 'i');
+    const getByPath = (object, path) => {
+      if (!path) {
+        return;
+      }
+    
+      return path.split('.').reduce((acc, value) => acc[value], object);
+    };
+    return methods
+      .sortBy()
+      .filter((item) =>
+        regexp.test(getByPath(item, props.searchBy) || getByPath(item, props.valueField))
+      );
   }
 
   const debouncedSearchTerm = useDebounce(searchTerm, 1500)
 
   useEffect(
     () => {
+      console.log(debouncedSearchTerm);
       if (debouncedSearchTerm) {
         onSearch(debouncedSearchTerm).then(res => {
-          // console.log(res);
           setSearchResults(res.results.map(result => ({
             label: result.title,
             value: result.id
@@ -46,7 +63,6 @@ export function SearchBar({ onChange, runCompare, artistHistory, pauseBackup }) 
   )
 
   const onSearch = async (artist) => {
-    // pauseBackup();
     return axios.get(`/api/discog/search/${encodeURIComponent(artist)}`)
       .then(res => res.data)
       .catch((error) => console.log(error))
@@ -60,12 +76,15 @@ export function SearchBar({ onChange, runCompare, artistHistory, pauseBackup }) 
     }
   }
 
+  
+
   return (
     <div id="search">
       <div id="searchBar">
         <Select
           multi
           options={searchResults.length ? searchResults : historyFormatted}
+          pattern='/^\s+|\s+$/g'
           searchFn={handleSearch}
           onChange={value => handleChange(value)}
           disabled={runCompare}

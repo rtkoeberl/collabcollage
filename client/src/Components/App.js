@@ -131,7 +131,6 @@ class App extends React.Component {
   saveArtist(valArr) {
 
     if (this.state.highlighted.id && valArr.map(a => a.value).indexOf(this.state.highlighted.id) === -1) {
-      console.log('The highlighted artist has been deleted!')
       this.setState({
         highlighted: {
           name: null,
