@@ -1,5 +1,5 @@
 const { response } = require('express');
-const { discogsService, backupService } = require('../services');
+const { discogsService } = require('../services');
 
 const {
   searchArtists,
@@ -9,21 +9,22 @@ const {
 } = discogsService;
 
 // Return results of Discogs search for artist name
-const search = (req, res) => {
-  const { artist } = req.params;
-  searchArtists(artist)
-    .then(results => {
-      console.log('Search results retrieved')
-      res.json(results);
-    })
-    .catch(err => res.status(400).json('Error: ' + err))
+const search = async (req, res) => {
+  try {
+    const { artist } = req.params;
+    const artistResults = await searchArtists(artist);
+    console.log('Search results retrieved');
+    res.json(artistResults);
+  } catch {
+    err => res.status(400).json('Error: ' + err);
+  }
 };
 
 // Return artist info from Discogs
 const getArtist = async (req, res) => {
   try {
     const { artistId }  = req.params;
-    const artistInfo = await readArtist(artistId)
+    const artistInfo = await readArtist(artistId);
     console.log(`Artist info for ${artistInfo.name} retrieved`);
     res.json(artistInfo); 
   } catch {
@@ -35,7 +36,6 @@ const getArtist = async (req, res) => {
 const getArtistReleases = async (req, res) => {
   try {
     const { artistId }  = req.params;
-    // if (session history contains id) { pull from there and return }
     const results = await readArtistCredits(artistId)  
     console.log(`First page of artist #${artistId}'s credits retrieved`)
     res.json(results);
